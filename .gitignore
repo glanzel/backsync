@@ -1,0 +1,17 @@
+# Rust / Cargo
+/target/
+**/*.rs.bk
+*.pdb
+
+# Tauri (generierte Schemata)
+/gen/schemas/
+
+# Betriebssystem
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*~
