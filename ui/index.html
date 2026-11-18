@@ -2,179 +2,916 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Backup-Status</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backup</title>
 <style>
-  :root { color-scheme: dark; }
+  :root {
+    color-scheme: dark;
+    --bg: #0a0c10;
+    --panel: #10151c;
+    --panel-2: #141b23;
+    --raise: #18212b;
+    --line: #232e3a;
+    --line-strong: #35434f;
+    --text: #edf2f5;
+    --muted: #a5b2bf;
+    --dim: #6b7b89;
+    --teal: #1a8a9e;
+    --teal-strong: #147487;
+    --teal-light: #50bfcc;
+    --red: #e05d5d;
+    --amber: #d9a441;
+    --green: #4ec98a;
+    --blue: #5b9bd5;
+    --radius: 12px;
+  }
   * { box-sizing: border-box; }
-  html { background: #12151a; }
+  html, body { height: 100%; }
   body {
-    margin: 0; padding: 22px;
-    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: #12151a; color: #e6e6e6;
+    margin: 0;
+    font: 14px/1.55 "Schibsted Grotesk", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
   }
-  header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; }
-  h1 { font-size: 19px; margin: 0; font-weight: 600; }
-  .muted { color: #8b95a5; font-size: 12.5px; }
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-  .card { background: #1a1f27; border: 1px solid #262d38; border-radius: 10px; padding: 16px; }
-  .card h2 {
-    font-size: 12.5px; margin: 0 0 10px; color: #a9b4c4;
-    font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* Sidebar */
+  aside {
+    width: 212px; flex: 0 0 212px;
+    background: linear-gradient(180deg, #0d1218, #0a0c10 70%);
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    padding: 20px 14px;
   }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; }
-  .ok { background: #12351f; color: #4ade80; border: 1px solid #1e5c33; }
-  .bad { background: #3a1414; color: #f87171; border: 1px solid #6b2020; }
-  .warn { background: #3a2f10; color: #fbbf24; border: 1px solid #6b561a; }
-  .run { background: #14243a; color: #60a5fa; border: 1px solid #1e3a5c; }
-  table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-  td { padding: 3px 0; vertical-align: top; font-size: 13.5px; }
-  td:first-child { color: #8b95a5; width: 132px; }
-  pre {
-    background: #0e1116; border: 1px solid #232a34; border-radius: 6px;
-    padding: 8px; font-size: 11.5px; overflow: auto; max-height: 84px;
-    white-space: pre-wrap; color: #9aa6b6; margin: 10px 0 0;
+  .brand { display: flex; align-items: center; gap: 10px; padding: 2px 8px 20px; }
+  .brand .mark {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: radial-gradient(circle at 30% 25%, var(--teal-light), var(--teal-strong));
+    box-shadow: 0 4px 14px rgba(26,138,158,.35);
+    display: grid; place-items: center; color: #04171b; font-weight: 700; font-size: 15px;
   }
-  .bar { height: 8px; background: #232a34; border-radius: 999px; overflow: hidden; margin-top: 10px; }
-  .bar > div { height: 100%; background: linear-gradient(90deg, #2f6fd0, #4ade80); }
-  .alarm { background: #3a1414; border: 1px solid #7f2020; border-radius: 10px; padding: 14px; margin-bottom: 16px; }
-  .alarm strong { color: #fca5a5; display: block; margin-bottom: 6px; }
-  .alarm pre { background: #2a0f0f; border-color: #7f2020; color: #fecaca; margin: 0; max-height: none; }
-  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
-  button {
-    background: #202836; color: #dbe2ee; border: 1px solid #303a4a;
-    border-radius: 7px; padding: 7px 13px; font-size: 13px; cursor: pointer;
+  .brand h1 { font-size: 16px; margin: 0; font-weight: 650; letter-spacing: .01em; }
+  .brand span { display: block; font-size: 10.5px; color: var(--dim); letter-spacing: .09em; text-transform: uppercase; }
+  nav { display: flex; flex-direction: column; gap: 3px; }
+  nav button {
+    all: unset; cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 11px; border-radius: 9px;
+    color: var(--muted); font-size: 13.5px; font-weight: 500;
   }
-  button:hover { background: #27303f; }
-  button:disabled { opacity: .5; cursor: default; }
+  nav button svg { width: 16px; height: 16px; opacity: .8; }
+  nav button:hover { background: #131b23; color: var(--text); }
+  nav button.on { background: #16232c; color: var(--text); box-shadow: inset 0 0 0 1px #23323e; }
+  nav button.on svg { color: var(--teal-light); opacity: 1; }
+  .side-foot { margin-top: auto; padding: 10px 8px 0; font-size: 11px; color: var(--dim); line-height: 1.5; }
+  .side-foot .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--dim); margin-right: 5px; }
+  .side-foot .dot.live { background: var(--green); }
+
+  /* Main */
+  main { flex: 1; overflow: auto; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 26px 30px 60px; }
+  .topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+  .topbar h2 { font-size: 22px; margin: 0; font-weight: 650; letter-spacing: -.01em; }
+  .topbar .sub { color: var(--muted); font-size: 12.5px; }
+  .spacer { flex: 1; }
+
+  button.btn {
+    all: unset; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 14px; border-radius: 9px;
+    background: var(--teal); color: #04171b; font-weight: 600; font-size: 13px;
+    transition: background .15s;
+  }
+  button.btn:hover { background: var(--teal-light); }
+  button.btn.ghost { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong); }
+  button.btn.ghost:hover { background: var(--raise); }
+  button.btn.danger { background: transparent; color: #f0a0a0; box-shadow: inset 0 0 0 1px #5a2a2a; }
+  button.btn.danger:hover { background: #2a1414; }
+  button.btn.small { padding: 5px 10px; font-size: 12px; border-radius: 7px; }
+  button.btn:disabled { opacity: .45; cursor: default; }
+
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px;
+  }
+  .card h3 {
+    margin: 0 0 4px; font-size: 14.5px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card .cap { color: var(--dim); font-size: 12px; margin-bottom: 12px; word-break: break-all; }
+  .card pre {
+    background: #0b1015; border: 1px solid #1d2731; border-radius: 8px;
+    padding: 9px 10px; font-size: 11px; line-height: 1.5;
+    white-space: pre-wrap; overflow: auto; max-height: 96px; color: #94a4b3; margin: 12px 0 0;
+  }
+  .rows { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
+  .row { display: flex; gap: 12px; align-items: baseline; font-size: 13px; }
+  .row .k { color: var(--dim); width: 118px; flex: 0 0 118px; }
+  .row .v { color: var(--text); word-break: break-word; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: .01em;
+    background: #1b2530; color: var(--muted);
+  }
+  .pill.ok { background: rgba(78,201,138,.12); color: var(--green); }
+  .pill.bad { background: rgba(224,93,93,.13); color: #ef9c9c; }
+  .pill.warn { background: rgba(217,164,65,.13); color: var(--amber); }
+  .pill.run { background: rgba(91,155,213,.14); color: var(--blue); }
+  .pill.off { background: #1a222b; color: var(--dim); }
+
+  .bar { height: 7px; border-radius: 999px; background: #1d2731; overflow: hidden; margin: 12px 0 6px; }
+  .bar > div { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--teal-strong), var(--teal-light)); }
+
+  .alarm {
+    background: linear-gradient(180deg, #23100f, #1a0d0c);
+    border: 1px solid #5c2523; border-radius: var(--radius);
+    padding: 15px 17px; margin-bottom: 18px;
+  }
+  .alarm strong { color: #f0b3b0; display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 13.5px; }
+  .alarm pre { background: transparent; border: 0; color: #d9a5a2; padding: 0; max-height: none; margin: 0; }
+
+  /* Forms */
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .field label { font-size: 11.5px; color: var(--muted); font-weight: 500; letter-spacing: .02em; }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%; background: #0c1116; color: var(--text);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px 10px; font: inherit; font-size: 13px;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--teal); }
+  textarea { resize: vertical; min-height: 62px; font-family: ui-monospace, monospace; font-size: 12px; }
+  .form-grid { display: grid; gap: 0 14px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .check input { accent-color: var(--teal); width: 15px; height: 15px; }
+  .hint { font-size: 11.5px; color: var(--dim); margin: 4px 0 0; }
+
+  .job {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+  }
+  .job > summary {
+    list-style: none; cursor: pointer; padding: 15px 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .job > summary::-webkit-details-marker { display: none; }
+  .job > summary .title { font-weight: 600; font-size: 14px; }
+  .job > summary .where { color: var(--dim); font-size: 12px; }
+  .job > summary .chev { margin-left: auto; color: var(--dim); transition: transform .18s; }
+  .job[open] > summary .chev { transform: rotate(90deg); }
+  .job-body { padding: 0 18px 18px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .paths { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 12px; }
+  .path {
+    display: flex; align-items: center; gap: 10px;
+    background: #0c1116; border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 11px; font-size: 12.5px;
+  }
+  .path .p { flex: 1; word-break: break-all; font-family: ui-monospace, monospace; font-size: 12px; }
+  .path button { all: unset; cursor: pointer; color: var(--dim); font-size: 15px; line-height: 1; padding: 2px 4px; border-radius: 5px; }
+  .path button:hover { color: #ef9c9c; background: #241517; }
+
+  .list { display: flex; flex-direction: column; gap: 2px; }
+  .item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 11px; border-radius: 8px; font-size: 13px;
+    cursor: pointer; border: 1px solid transparent;
+  }
+  .item:hover { background: var(--panel-2); }
+  .item.sel { background: #13232b; border-color: #24404c; }
+  .item .nm { flex: 1; word-break: break-all; }
+  .item .meta { color: var(--dim); font-size: 11.5px; white-space: nowrap; }
+  .item.dir .nm::before { content: "▸ "; color: var(--teal-light); }
+  .item.parent .nm { color: var(--muted); }
+
+  .split { display: grid; grid-template-columns: 300px 1fr; gap: 14px; align-items: start; }
+  .crumbs { display: flex; gap: 4px; flex-wrap: wrap; font-size: 12px; color: var(--dim); margin-bottom: 10px; }
+  .crumbs span { cursor: pointer; color: var(--teal-light); }
+  .crumbs span:hover { text-decoration: underline; }
+  .empty { color: var(--dim); font-size: 12.5px; padding: 16px 4px; text-align: center; }
+  .row-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .live { color: var(--dim); font-size: 11.5px; }
+  .result { margin-top: 12px; font-size: 12px; }
+  .result pre { max-height: 180px; }
+  .ok-text { color: var(--green); }
+  .bad-text { color: #ef9c9c; }
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #17232c; border: 1px solid #2a3c49; color: var(--text);
+    padding: 10px 16px; border-radius: 9px; font-size: 13px;
+    opacity: 0; pointer-events: none; transition: all .22s; z-index: 20;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { border-color: #5c2523; color: #f0b3b0; }
+  kbd { background: #1b2530; border-radius: 4px; padding: 1px 5px; font-size: 11px; }
 </style>
 </head>
 <body>
-<header>
-  <h1>Backup-Status</h1>
-  <span class="muted" id="stamp">lädt …</span>
-</header>
-
-<div id="alarm"></div>
-<div class="grid" id="cards"></div>
-
-<div class="actions">
-  <button id="b-restic">Backup jetzt starten</button>
-  <button id="b-sync">Sync jetzt starten</button>
-  <button id="b-watch">Jetzt prüfen</button>
-  <button id="b-reload">Neu laden</button>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <div class="mark">B</div>
+      <div><h1>Backup</h1><span>restic &amp; rclone</span></div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="side-foot">
+      <div><span class="dot" id="dot"></span><span id="live">verbinde …</span></div>
+      <div id="cfgpath" style="margin-top:6px"></div>
+    </div>
+  </aside>
+  <main><div class="wrap" id="view"></div></main>
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
 const inv = (cmd, args) => window.__TAURI__.core.invoke(cmd, args || {});
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = (id) => document.getElementById(id);
 
-function badge(u) {
-  if (['active','activating','reloading'].includes(u.state)) return '<span class="badge run">LÄUFT GERADE</span>';
-  if (u.result === 'success') return '<span class="badge ok">ALLES OK</span>';
-  if (['failed','exit-code','timeout','signal'].includes(u.result)) return '<span class="badge bad">FEHLGESCHLAGEN</span>';
-  return '<span class="badge warn">NOCH NIE GELAUFEN</span>';
-}
+let page = "overview";
+let cfg = null;
+let st = null;
+let busy = false;
 
-function card(title, u, extra) {
-  const rows = [];
-  if (u.last) rows.push(`<tr><td>Letzter Lauf</td><td>${esc(u.last)}</td></tr>`);
-  if (u.next) rows.push(`<tr><td>Nächster Lauf</td><td>${esc(u.next)}</td></tr>`);
-  return `<div class="card"><h2>${esc(title)}</h2>${badge(u)}
-    <table>${rows.join('')}${extra || ''}</table>
-    ${u.tail ? `<pre>${esc(u.tail)}</pre>` : ''}</div>`;
-}
-
-function render(s) {
-  document.getElementById('stamp').textContent = 'Stand ' + s.now;
-  document.getElementById('alarm').innerHTML = s.alarm
-    ? `<div class="alarm"><strong>Aktueller Alarm</strong><pre>${esc(s.alarm)}</pre></div>`
-    : '';
-
-  const loading = s.partial ? 'wird geladen …' : '–';
-  const resticExtra = `
-    <tr><td>Letzter Snapshot</td><td>${esc(s.restic.snapshot || loading)} ${esc(s.restic.snapshot_id || '')}</td></tr>
-    <tr><td>Gesichert</td><td>${esc(s.restic.snapshot_size || loading)}</td></tr>`;
-
-  const syncExtra = s.sync.tail && s.sync.tail.includes('Transferred')
-    ? '' : '';
-
-  let cloud = '<div class="card"><h2>pCloud</h2>';
-  if (s.cloud.total) {
-    cloud += `<table>
-      <tr><td>Belegt</td><td>${esc(s.cloud.used)} von ${esc(s.cloud.total)}</td></tr>
-      <tr><td>Frei</td><td>${esc(s.cloud.free)}</td></tr></table>
-      <div class="bar"><div style="width:${s.cloud.percent.toFixed(1)}%"></div></div>`;
-  } else if (s.partial) {
-    cloud += '<table><tr><td>Status</td><td>wird geladen …</td></tr></table>';
-  } else {
-    cloud += '<table><tr><td>Status</td><td>nicht erreichbar</td></tr></table>';
-  }
-  cloud += '</div>';
-
-  document.getElementById('cards').innerHTML =
-    card('restic-Backup', s.restic, resticExtra) +
-    card('Media-Sync (Musik)', s.sync, syncExtra) +
-    card('Wächter', s.watchdog) +
-    cloud;
-}
-
-let fastBusy = false;
-let fullBusy = false;
-let fullPending = false;
-
-function setStamp(extra) {
-  const el = document.getElementById('stamp');
-  if (extra) el.textContent = extra;
-}
-
-async function loadFast() {
-  if (fastBusy) return;
-  fastBusy = true;
-  try {
-    render(await inv('status_fast'));
-    inv('ready').catch(() => {});
-  }
-  catch (e) {
-    setStamp('Fehler: ' + e);
-    inv('ready').catch(() => {});
-  }
-  finally { fastBusy = false; }
-}
-
-async function loadFull(force) {
-  if (fullBusy) { if (force) fullPending = true; return; }
-  fullBusy = true;
-  if (force) setStamp('lädt …');
-  try { render(await inv(force ? 'refresh' : 'status')); }
-  catch (e) { setStamp('Fehler: ' + e); }
-  finally {
-    fullBusy = false;
-    if (fullPending) { fullPending = false; loadFull(true); }
-  }
-}
-
-async function load(force) {
-  await loadFast();
-  await loadFull(force);
-}
-
-const start = (name, btn) => async () => {
-  btn.disabled = true;
-  try { await inv('action', { name }); }
-  catch (e) { alert('Fehler: ' + e); }
-  finally { btn.disabled = false; setTimeout(() => load(false), 1200); }
+const icons = {
+  overview: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  backup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H10l2 2h5.5A2.5 2.5 0 0 1 20 9.5v7A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z"/></svg>',
+  sync: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9a8 8 0 0 1 13.5-3.5L20 8"/><path d="M20 4v4h-4"/><path d="M20 15a8 8 0 0 1-13.5 3.5L4 16"/><path d="M4 20v-4h4"/></svg>',
+  restore: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>'
 };
 
-const bRestic = document.getElementById('b-restic');
-const bSync = document.getElementById('b-sync');
-const bWatch = document.getElementById('b-watch');
-bRestic.onclick = start('restic', bRestic);
-bSync.onclick = start('sync', bSync);
-bWatch.onclick = start('watchdog', bWatch);
-document.getElementById('b-reload').onclick = () => load(true);
+const pages = [
+  ["overview", "Übersicht"],
+  ["backup", "Backup"],
+  ["sync", "Sync"],
+  ["restore", "Wiederherstellen"],
+  ["settings", "Einstellungen"]
+];
 
-load(false);
-setInterval(() => load(false), 20000);
+function toast(msg, err) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (err ? " err" : "");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => { t.className = "toast"; }, 3200);
+}
+
+function nav() {
+  $("nav").innerHTML = pages.map(([id, label]) =>
+    `<button data-page="${id}" class="${page === id ? "on" : ""}">${icons[id]}<span>${label}</span></button>`
+  ).join("");
+  $("nav").querySelectorAll("button").forEach(b => {
+    b.onclick = () => { page = b.dataset.page; nav(); render(); };
+  });
+}
+
+function pill(u) {
+  if (u.active) return '<span class="pill run">läuft</span>';
+  if (u.failed) return '<span class="pill bad">fehlgeschlagen</span>';
+  if (u.result === "success") return '<span class="pill ok">ok</span>';
+  return '<span class="pill warn">noch nie</span>';
+}
+
+function rows(list) {
+  return `<div class="rows">${list.filter(r => r && r[1] !== undefined)
+    .map(([k, v]) => `<div class="row"><div class="k">${esc(k)}</div><div class="v">${v}</div></div>`).join("")}</div>`;
+}
+
+async function loadCfg() { cfg = await inv("config_get"); }
+async function loadFast() {
+  try { st = await inv("status_fast"); }
+  catch (e) { $("live").textContent = "Status nicht lesbar"; }
+}
+async function loadFull(force) {
+  try { st = await inv(force ? "refresh" : "status"); }
+  catch (e) { }
+}
+
+function statusHead() {
+  if (!st) return "";
+  $("dot").className = "dot live";
+  $("live").textContent = "Stand " + (st.now || "");
+  $("cfgpath").innerHTML = `<span title="${esc(st.config_path)}">Konfiguration in Datei</span>`;
+  return "";
+}
+
+/* ---------------- Übersicht ---------------- */
+function pageOverview() {
+  const s = st || {};
+  const restic = (s.restic || []).map(job => {
+    const snap = job.snapshot;
+    const extra = rows([
+      ["Repository", `<span class="mono">${esc(job.repository)}</span>`],
+      ["Letzter Snapshot", snap ? esc(snap.time) : (s.partial ? "wird geladen …" : (job.error ? `<span class="bad-text">${esc(job.error)}</span>` : "–"))],
+      ["Umfang", snap ? `${esc(snap.size)} · ${snap.files} Dateien` : "–"],
+      ["Nächster Lauf", esc(job.next || "–")]
+    ]);
+    return `<div class="card">
+      <h3>${esc(job.name)} ${job.enabled ? "" : '<span class="pill off">pausiert</span>'} ${pill(job)}</h3>
+      <div class="cap">${job.paths.length} Ordner${job.snapshot && job.snapshot.id ? " · " + esc(job.snapshot.id) : ""}</div>
+      ${extra}
+      ${job.tail ? `<pre>${esc(job.tail)}</pre>` : ""}
+      <div class="row-actions"><button class="btn small" data-run="restic" data-id="${esc(job.id)}">Jetzt sichern</button></div>
+    </div>`;
+  }).join("");
+
+  const sync = (s.sync || []).map(job => {
+    const extra = rows([
+      ["Von", `<span class="mono">${esc(job.source)}</span>`],
+      ["Nach", `<span class="mono">${esc(job.target)}</span>`],
+      ["Modus", esc(job.mode === "copy" ? "kopieren (nichts löschen)" : "synchronisieren")],
+      ["Nächster Lauf", esc(job.next || "–")]
+    ]);
+    return `<div class="card">
+      <h3>${esc(job.name)} ${job.enabled ? "" : '<span class="pill off">pausiert</span>'} ${pill(job)}</h3>
+      <div class="cap">rclone</div>
+      ${extra}
+      ${job.tail ? `<pre>${esc(job.tail)}</pre>` : ""}
+      <div class="row-actions"><button class="btn small" data-run="sync" data-id="${esc(job.id)}">Jetzt abgleichen</button></div>
+    </div>`;
+  }).join("");
+
+  const clouds = (s.clouds || []).map(c => {
+    if (!c.ok && s.partial) {
+      return `<div class="card"><h3>Speicher ${esc(c.remote)}</h3><div class="cap">wird geladen …</div></div>`;
+    }
+    if (!c.ok) {
+      return `<div class="card"><h3>Speicher ${esc(c.remote)}</h3><div class="cap bad-text">nicht erreichbar</div></div>`;
+    }
+    return `<div class="card"><h3>Speicher ${esc(c.remote)}</h3>
+      <div class="cap">${esc(c.used)} von ${esc(c.total)} belegt</div>
+      <div class="bar"><div style="width:${Math.max(1, c.percent).toFixed(1)}%"></div></div>
+      <div class="row"><div class="v muted">${esc(c.free)} frei</div></div>
+    </div>`;
+  }).join("");
+
+  const wd = s.watchdog ? `<div class="card">
+    <h3>Wächter ${pill(s.watchdog)}</h3>
+    <div class="cap">prüft selbstständig, ob alles aktuell ist</div>
+    ${rows([["Letzte Prüfung", esc(s.watchdog.last || "–")], ["Nächste Prüfung", esc(s.watchdog.next || "–")]])}
+    ${s.watchdog.tail ? `<pre>${esc(s.watchdog.tail)}</pre>` : ""}
+    <div class="row-actions"><button class="btn small ghost" data-run="watchdog" data-id="">Jetzt prüfen</button></div>
+  </div>` : "";
+
+  return `
+    <div class="topbar">
+      <div><h2>Übersicht</h2><div class="sub">Backup und Synchronisierung auf einen Blick</div></div>
+      <div class="spacer"></div>
+      <button class="btn ghost" id="reload">Neu laden</button>
+    </div>
+    ${s.alarm ? `<div class="alarm"><strong>⚠ Aktueller Alarm</strong><pre>${esc(s.alarm)}</pre></div>` : ""}
+    <div class="grid">${restic}${sync}${clouds}${wd}</div>
+    ${(!s.restic && !s.sync) ? `<div class="empty">Noch keine Jobs konfiguriert – lege sie unter „Backup“ und „Sync“ an.</div>` : ""}
+  `;
+}
+
+/* ---------------- Backup ---------------- */
+function resticJobHtml(job, idx) {
+  const paths = (job.paths || []).map(p =>
+    `<div class="path"><span class="p">${esc(p)}</span><button data-rm-path="${idx}" data-path="${esc(p)}" title="Entfernen">×</button></div>`
+  ).join("") || '<div class="empty">Noch keine Ordner</div>';
+  return `<details class="job" data-idx="${idx}" ${idx === 0 ? "open" : ""}>
+    <summary>
+      <span class="chev">▸</span>
+      <div><div class="title">${esc(job.name || job.id || "Neuer Job")}</div>
+      <div class="where">${esc(job.repository || "kein Repository")} · ${(job.paths || []).length} Ordner</div></div>
+    </summary>
+    <div class="job-body">
+      <div class="form-grid">
+        <div class="field"><label>Name</label><input type="text" data-f="name" value="${esc(job.name)}"></div>
+        <div class="field"><label>Kennung</label><input type="text" data-f="id" value="${esc(job.id)}"></div>
+        <div class="field"><label>Repository</label><input type="text" data-f="repository" value="${esc(job.repository)}"></div>
+        <div class="field"><label>Passwortdatei</label><input type="text" data-f="password_file" value="${esc(job.password_file)}"></div>
+        <div class="field"><label>Cache-Verzeichnis</label><input type="text" data-f="cache_dir" value="${esc(job.cache_dir)}"></div>
+        <div class="field"><label>Ausschlussdatei</label><input type="text" data-f="exclude_file" value="${esc(job.exclude_file)}"></div>
+        <div class="field"><label>Zeitplan (systemd, z. B. 12h)</label><input type="text" data-f="schedule" value="${esc(job.schedule)}"></div>
+        <div class="field"><label>Start nach (z. B. 3min)</label><input type="text" data-f="startup" value="${esc(job.startup)}"></div>
+        <div class="field"><label>Timeout</label><input type="text" data-f="timeout" value="${esc(job.timeout)}"></div>
+        <div class="field"><label>Host</label><input type="text" data-f="host" value="${esc(job.host)}"></div>
+        <div class="field"><label>Aufbewahrung täglich</label><input type="number" data-f="keep_daily" value="${job.keep_daily ?? ""}"></div>
+        <div class="field"><label>wöchentlich</label><input type="number" data-f="keep_weekly" value="${job.keep_weekly ?? ""}"></div>
+        <div class="field"><label>monatlich</label><input type="number" data-f="keep_monthly" value="${job.keep_monthly ?? ""}"></div>
+        <div class="field"><label>jährlich</label><input type="number" data-f="keep_yearly" value="${job.keep_yearly ?? ""}"></div>
+        <div class="field"><label>Tags (Komma)</label><input type="text" data-f="tags" value="${esc((job.tags || []).join(", "))}"></div>
+        <div class="field"><label>Ausschlüsse (eine pro Zeile)</label><textarea data-f="exclude">${esc((job.exclude || []).join("\n"))}</textarea></div>
+      </div>
+      <div class="check"><input type="checkbox" data-f="enabled" ${job.enabled ? "checked" : ""}><span>aktiv</span></div>
+      <div class="check"><input type="checkbox" data-f="exclude_caches" ${job.exclude_caches ? "checked" : ""}><span>Cache-Verzeichnisse überspringen</span></div>
+      <div class="check"><input type="checkbox" data-f="one_file_system" ${job.one_file_system ? "checked" : ""}><span>nicht über Dateisystemgrenzen</span></div>
+      <label style="font-size:11.5px;color:var(--muted)">Ordner</label>
+      <div class="paths">${paths}</div>
+      <div class="row-actions">
+        <button class="btn small ghost" data-add-path="${idx}">Ordner hinzufügen …</button>
+        <button class="btn small" data-run="restic" data-id="${esc(job.id)}">Jetzt sichern</button>
+        <button class="btn small danger" data-del-restic="${idx}">Job löschen</button>
+      </div>
+    </div>
+  </details>`;
+}
+
+function pageBackup() {
+  const jobs = (cfg?.restic || []);
+  return `
+    <div class="topbar">
+      <div><h2>Backup</h2><div class="sub">verschlüsselte Snapshots mit restic, konfiguriert in <span class="mono">${esc(st ? st.config_path : "")}</span></div></div>
+      <div class="spacer"></div>
+      <button class="btn ghost" id="new-restic">Neuer Job</button>
+      <button class="btn" id="save-restic">Speichern</button>
+    </div>
+    <div id="jobs">${jobs.map(resticJobHtml).join("") || '<div class="empty">Keine Backup-Jobs</div>'}</div>
+    <p class="hint">Ordner und Einstellungen landen in der Konfigurationsdatei. Unter „Einstellungen“ werden daraus systemd-Timer erzeugt – oder alles per <span class="mono">backup-status apply</span>.</p>
+  `;
+}
+
+/* ---------------- Sync ---------------- */
+function syncJobHtml(job, idx) {
+  return `<details class="job" data-idx="${idx}" ${idx === 0 ? "open" : ""}>
+    <summary>
+      <span class="chev">▸</span>
+      <div><div class="title">${esc(job.name || job.id || "Neuer Sync")}</div>
+      <div class="where">${esc(job.source || "?")} → ${esc(job.target || "?")}</div></div>
+    </summary>
+    <div class="job-body">
+      <div class="form-grid">
+        <div class="field"><label>Name</label><input type="text" data-f="name" value="${esc(job.name)}"></div>
+        <div class="field"><label>Kennung</label><input type="text" data-f="id" value="${esc(job.id)}"></div>
+        <div class="field"><label>Quelle</label><input type="text" data-f="source" value="${esc(job.source)}"></div>
+        <div class="field"><label>Ziel (rclone, z. B. pcloud:media)</label><input type="text" data-f="target" value="${esc(job.target)}"></div>
+        <div class="field"><label>Modus</label>
+          <select data-f="mode">
+            <option value="sync" ${job.mode === "sync" ? "selected" : ""}>synchronisieren (Ziel angleichen)</option>
+            <option value="copy" ${job.mode === "copy" ? "selected" : ""}>kopieren (nichts löschen)</option>
+          </select>
+        </div>
+        <div class="field"><label>Sicherungsordner für Gelöschtes</label><input type="text" data-f="backup_dir" value="${esc(job.backup_dir)}"></div>
+        <div class="field"><label>Zeitplan</label><input type="text" data-f="schedule" value="${esc(job.schedule)}"></div>
+        <div class="field"><label>Start nach</label><input type="text" data-f="startup" value="${esc(job.startup)}"></div>
+        <div class="field"><label>Timeout</label><input type="text" data-f="timeout" value="${esc(job.timeout)}"></div>
+        <div class="field"><label>Transfers</label><input type="number" data-f="transfers" value="${job.transfers ?? ""}"></div>
+        <div class="field"><label>Checkers</label><input type="number" data-f="checkers" value="${job.checkers ?? ""}"></div>
+        <div class="field"><label>Ausschlüsse (eine pro Zeile)</label><textarea data-f="exclude">${esc((job.exclude || []).join("\n"))}</textarea></div>
+      </div>
+      <div class="check"><input type="checkbox" data-f="enabled" ${job.enabled ? "checked" : ""}><span>aktiv</span></div>
+      <div class="row-actions">
+        <button class="btn small" data-run="sync" data-id="${esc(job.id)}">Jetzt abgleichen</button>
+        <button class="btn small danger" data-del-sync="${idx}">Job löschen</button>
+      </div>
+    </div>
+  </details>`;
+}
+
+function pageSync() {
+  const jobs = (cfg?.sync || []);
+  return `
+    <div class="topbar">
+      <div><h2>Sync</h2><div class="sub">Ordner mit rclone abgleichen – Backup und Sync sind getrennt konfigurierbar</div></div>
+      <div class="spacer"></div>
+      <button class="btn ghost" id="new-sync">Neuer Job</button>
+      <button class="btn" id="save-sync">Speichern</button>
+    </div>
+    <div id="jobs">${jobs.map(syncJobHtml).join("") || '<div class="empty">Keine Sync-Jobs</div>'}</div>
+  `;
+}
+
+/* ---------------- Wiederherstellen ---------------- */
+let restoreState = { job: "", snapshot: "", dir: "", selected: "", snaps: [], files: [], parent: "" };
+
+function pageRestore() {
+  const jobs = cfg?.restic || [];
+  const rs = restoreState;
+  if (!rs.job && jobs.length) rs.job = jobs[0].id;
+  return `
+    <div class="topbar">
+      <div><h2>Wiederherstellen</h2><div class="sub">Snapshot wählen, Dateien ansehen und zurückholen</div></div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="form-grid">
+        <div class="field"><label>Backup-Job</label>
+          <select id="r-job">${jobs.map(j => `<option value="${esc(j.id)}" ${j.id === rs.job ? "selected" : ""}>${esc(j.name)}</option>`).join("")}</select>
+        </div>
+        <div class="field"><label>Snapshot</label>
+          <select id="r-snap"><option value="">– Snapshot laden –</option>${rs.snaps.map(s => `<option value="${esc(s.id)}" ${s.id === rs.snapshot ? "selected" : ""}>${esc(s.label)}</option>`).join("")}</select>
+        </div>
+      </div>
+      <div class="row-actions">
+        <button class="btn ghost" id="r-load">Snapshots laden</button>
+        <button class="btn ghost" id="r-search-toggle">Datei suchen</button>
+      </div>
+      <div id="r-searchwrap" style="display:none;margin-top:12px">
+        <div class="field"><label>Suchbegriff im Snapshot</label>
+          <div style="display:flex;gap:8px"><input type="text" id="r-query" placeholder="z. B. Rechnung.pdf"><button class="btn" id="r-search">Suchen</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="split">
+      <div class="card">
+        <h3>Dateien</h3>
+        <div class="cap" id="r-browse-cap">${rs.snapshot ? esc(rs.dir || "/") : "Noch kein Snapshot gewählt"}</div>
+        <div id="r-crumbs" class="crumbs"></div>
+        <div class="list" id="r-files"><div class="empty">–</div></div>
+      </div>
+      <div class="card">
+        <h3>Zurückholen</h3>
+        <div class="cap">Auswahl: <span id="r-selected" class="mono">gesamter Snapshot</span></div>
+        <div class="field"><label>Zielordner</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="r-target" placeholder="~/wiederhergestellt">
+            <button class="btn ghost small" id="r-pick">Wählen …</button>
+          </div>
+        </div>
+        <div class="check"><input type="checkbox" id="r-dry"><span>nur anzeigen (Probelauf)</span></div>
+        <div class="row-actions">
+          <button class="btn" id="r-do">Wiederherstellen</button>
+          <button class="btn ghost" id="r-clear">Auswahl aufheben</button>
+          <button class="btn ghost" id="r-open" style="display:none">Ordner öffnen</button>
+        </div>
+        <div class="result" id="r-result"></div>
+        <p class="hint">Die vollständige Verzeichnisstruktur wird unter dem Zielordner angelegt. Ohne Auswahl wird der ganze Snapshot wiederhergestellt.</p>
+      </div>
+    </div>
+  `;
+}
+
+function snapshotLabel(s) {
+  let when = s.time || "";
+  const d = new Date(when);
+  if (!isNaN(d)) {
+    when = d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+  const short = (s.short_id || (s.id || "").slice(0, 8));
+  return `${when} · ${short}`;
+}
+
+function renderFiles() {
+  const rs = restoreState;
+  const list = $("r-files");
+  if (!list) return;
+  $("r-browse-cap").textContent = rs.dir || "/";
+  const parts = rs.dir.split("/").filter(Boolean);
+  let crumbs = `<span data-crumb="">/</span>`;
+  let acc = "";
+  for (const p of parts) {
+    acc += "/" + p;
+    crumbs += ` <span data-crumb="${esc(acc)}">${esc(p)}</span> /`;
+  }
+  $("r-crumbs").innerHTML = rs.dir ? crumbs : "";
+  $("r-crumbs").querySelectorAll("[data-crumb]").forEach(el => {
+    el.onclick = () => { rs.dir = el.dataset.crumb; renderFiles(); };
+  });
+
+  if (!rs.snapshot) { list.innerHTML = '<div class="empty">–</div>'; return; }
+  if (!rs.files.length) { list.innerHTML = '<div class="empty">leer</div>'; return; }
+
+  let html = "";
+  if (rs.parent) html += `<div class="item parent" data-dir="${esc(rs.parent)}"><span class="nm">… übergeordnet</span></div>`;
+  html += rs.files.map(n => {
+    const isDir = n.type === "dir";
+    const size = isDir ? "" : (n.size != null ? fmtSize(n.size) : "");
+    return `<div class="item ${isDir ? "dir" : ""} ${rs.selected === n.path ? "sel" : ""}" data-${isDir ? "dir" : "file"}="${esc(n.path)}">
+      <span class="nm">${esc(n.name)}</span><span class="meta">${esc(size)}</span></div>`;
+  }).join("");
+  list.innerHTML = html;
+  list.querySelectorAll("[data-dir]").forEach(el => {
+    el.onclick = () => { rs.dir = el.dataset.dir; rs.selected = ""; updateSelected(); browse(); };
+  });
+  list.querySelectorAll("[data-file]").forEach(el => {
+    el.onclick = () => { rs.selected = el.dataset.file; updateSelected(); list.querySelectorAll(".item").forEach(i => i.classList.remove("sel")); el.classList.add("sel"); };
+  });
+}
+
+function updateSelected() {
+  const el = $("r-selected");
+  if (el) el.textContent = restoreState.selected || "gesamter Snapshot";
+}
+
+function fmtSize(n) {
+  const u = ["B", "KiB", "MiB", "GiB", "TiB"]; let v = n, i = 0;
+  while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+  return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${u[i]}`;
+}
+
+async function browse() {
+  const rs = restoreState;
+  if (!rs.snapshot) return;
+  const dir = rs.dir;
+  rs.parent = dir ? dir.split("/").slice(0, -1).join("/") || "" : "";
+  try {
+    const nodes = await inv("snapshot_files", { jobId: rs.job, snapshot: rs.snapshot, dir });
+    nodes.sort((a, b) => (a.type === b.type ? a.name.localeCompare(b.name) : a.type === "dir" ? -1 : 1));
+    rs.files = nodes.filter(n => n.path !== dir);
+    renderFiles();
+  } catch (e) { toast(String(e), true); }
+}
+
+/* ---------------- Einstellungen ---------------- */
+function pageSettings() {
+  const s = cfg?.settings || {};
+  return `
+    <div class="topbar">
+      <div><h2>Einstellungen</h2><div class="sub">Alles wird in einer TOML-Datei gespeichert und funktioniert auch ohne Oberfläche</div></div>
+      <div class="spacer"></div>
+      <button class="btn" id="save-settings">Speichern</button>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <h3>Dateien</h3>
+      <div class="cap">Konfiguration <span class="mono">${esc(st ? st.config_path : "")}</span></div>
+      <div class="row-actions">
+        <button class="btn ghost small" id="open-cfg">Ordner öffnen</button>
+        <button class="btn ghost small" id="copy-cfg">Pfad kopieren</button>
+      </div>
+      <p class="hint">Alle Jobs, Ordner und Zeitpläne stehen in dieser Datei. Ein Editor genügt, um auch ohne Fenster zu arbeiten (z. B. <span class="mono">backup-status run restic dokumente</span>).</p>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <h3>Wächter</h3>
+      <div class="cap">meldet, wenn Backups zu alt sind oder fehlschlagen</div>
+      <div class="form-grid">
+        <div class="field"><label>Maximales Alter Backup (h)</label><input type="number" data-sf="max_restic_h" value="${s.max_restic_h ?? 48}"></div>
+        <div class="field"><label>Maximales Alter Sync (h)</label><input type="number" data-sf="max_sync_h" value="${s.max_sync_h ?? 18}"></div>
+        <div class="field"><label>Prüfintervall</label><input type="text" data-sf="watchdog_schedule" value="${esc(s.watchdog_schedule || "1h")}"></div>
+        <div class="field"><label>Start nach</label><input type="text" data-sf="watchdog_startup" value="${esc(s.watchdog_startup || "10min")}"></div>
+        <div class="field"><label>Zustandsordner</label><input type="text" data-sf="state_dir" value="${esc(s.state_dir || "")}"></div>
+      </div>
+      <div class="check"><input type="checkbox" data-sf="watchdog_enabled" ${s.watchdog_enabled ? "checked" : ""}><span>Wächter aktiv</span></div>
+    </div>
+    <div class="card">
+      <h3>systemd</h3>
+      <div class="cap">aus der Konfiguration werden Timer für alle aktiven Jobs erzeugt</div>
+      <div class="check"><input type="checkbox" data-sf="disable_legacy" ${s.disable_legacy ? "checked" : ""}><span>alte Units (restic-backup, media-sync, backup-watchdog) beim Anwenden abschalten</span></div>
+      <div class="row-actions">
+        <button class="btn" id="apply-units">Timer schreiben &amp; aktivieren</button>
+        <button class="btn ghost" id="disable-legacy">Alte Units abschalten</button>
+        <button class="btn danger" id="remove-units">Alle Backup-Units entfernen</button>
+      </div>
+      <div class="result" id="s-result"></div>
+    </div>
+  `;
+}
+
+/* ---------------- Rendern ---------------- */
+function render() {
+  statusHead();
+  const view = $("view");
+  if (page === "overview") view.innerHTML = pageOverview();
+  else if (page === "backup") view.innerHTML = pageBackup();
+  else if (page === "sync") view.innerHTML = pageSync();
+  else if (page === "restore") view.innerHTML = pageRestore();
+  else view.innerHTML = pageSettings();
+  wire();
+}
+
+/* ---------------- Formulare lesen ---------------- */
+function readForm(container, base) {
+  const out = JSON.parse(JSON.stringify(base || {}));
+  container.querySelectorAll("[data-f]").forEach(el => {
+    const f = el.dataset.f;
+    if (el.type === "checkbox") out[f] = el.checked;
+    else if (el.type === "number") out[f] = el.value === "" ? null : Number(el.value);
+    else if (f === "exclude" || f === "tags") out[f] = el.value.split(f === "tags" ? "," : "\n").map(s => s.trim()).filter(Boolean);
+    else out[f] = el.value;
+  });
+  return out;
+}
+
+function collectRestic() {
+  const list = [];
+  document.querySelectorAll("#jobs details.job").forEach(d => {
+    const idx = Number(d.dataset.idx);
+    list.push(readForm(d, cfg.restic[idx]));
+  });
+  cfg.restic = list;
+}
+
+function collectSync() {
+  const list = [];
+  document.querySelectorAll("#jobs details.job").forEach(d => {
+    const idx = Number(d.dataset.idx);
+    list.push(readForm(d, cfg.sync[idx]));
+  });
+  cfg.sync = list;
+}
+
+function readSettings() {
+  const out = { ...cfg.settings };
+  document.querySelectorAll("[data-sf]").forEach(el => {
+    const f = el.dataset.sf;
+    if (el.type === "checkbox") out[f] = el.checked;
+    else if (el.type === "number") out[f] = Number(el.value || 0);
+    else out[f] = el.value;
+  });
+  cfg.settings = out;
+}
+
+/* ---------------- Aktionen ---------------- */
+function newRestic() {
+  if (page === "backup") collectRestic();
+  cfg.restic.push({
+    id: "job" + (cfg.restic.length + 1), name: "Neuer Job", enabled: true,
+    repository: "rclone:pcloud:backups/restic", password_file: "", cache_dir: "",
+    paths: [], exclude_file: "", exclude: [], keep_daily: 7, keep_weekly: 4,
+    keep_monthly: 12, keep_yearly: 2, schedule: "12h", startup: "3min",
+    timeout: "12h", tags: ["scheduled"], host: "", one_file_system: true,
+    exclude_caches: true, unit: "", timer: ""
+  });
+  render();
+}
+
+function newSync() {
+  if (page === "sync") collectSync();
+  cfg.sync.push({
+    id: "sync" + (cfg.sync.length + 1), name: "Neuer Sync", enabled: true,
+    source: "", target: "pcloud:", mode: "sync", schedule: "6h", startup: "2min",
+    timeout: "24h", backup_dir: ".deleted/{timestamp}", exclude: [".deleted/**"],
+    extra_flags: [], transfers: 4, checkers: 8, unit: "", timer: ""
+  });
+  render();
+}
+
+async function saveCfg(msg) {
+  try {
+    if (page === "backup") collectRestic();
+    if (page === "sync") collectSync();
+    if (page === "settings") readSettings();
+    cfg = await inv("config_save", { cfg });
+    await loadCfg();
+    toast(msg || "Konfiguration gespeichert");
+    render();
+  } catch (e) { toast(String(e), true); }
+}
+
+async function doRun(kind, id) {
+  try {
+    await inv("run_job", { kind, id });
+    toast("gestartet – Ergebnis erscheint nach dem nächsten Laden");
+    setTimeout(async () => { await loadFast(); render(); await loadFull(false); render(); }, 1500);
+  } catch (e) { toast(String(e), true); }
+}
+
+function wire() {
+  document.querySelectorAll("[data-run]").forEach(b => {
+    b.onclick = () => doRun(b.dataset.run, b.dataset.id);
+  });
+  const reload = $("reload");
+  if (reload) reload.onclick = async () => { reload.disabled = true; await loadFull(true); render(); };
+
+  const nr = $("new-restic"); if (nr) nr.onclick = newRestic;
+  const ns = $("new-sync"); if (ns) ns.onclick = newSync;
+  const sr = $("save-restic"); if (sr) sr.onclick = () => saveCfg("Backup-Jobs gespeichert");
+  const ss = $("save-sync"); if (ss) ss.onclick = () => saveCfg("Sync-Jobs gespeichert");
+  const stg = $("save-settings"); if (stg) stg.onclick = () => saveCfg("Einstellungen gespeichert");
+
+  document.querySelectorAll("[data-del-restic]").forEach(b => {
+    b.onclick = () => { collectRestic(); cfg.restic.splice(Number(b.dataset.delRestic), 1); render(); };
+  });
+  document.querySelectorAll("[data-del-sync]").forEach(b => {
+    b.onclick = () => { collectSync(); cfg.sync.splice(Number(b.dataset.delSync), 1); render(); };
+  });
+
+  document.querySelectorAll("[data-add-path]").forEach(b => {
+    b.onclick = async () => {
+      const idx = Number(b.dataset.addPath);
+      const dir = await inv("pick_folder");
+      if (!dir) return;
+      collectRestic();
+      const job = cfg.restic[idx];
+      if (!job.paths.includes(dir)) job.paths.push(dir);
+      try {
+        cfg = await inv("add_paths", { jobId: job.id, paths: [dir] });
+        await loadCfg();
+        toast("Ordner hinzugefügt und gespeichert");
+        render();
+        document.querySelectorAll("#jobs details.job").forEach(d => { if (Number(d.dataset.idx) === idx) d.open = true; });
+      } catch (e) { toast(String(e), true); }
+    };
+  });
+
+  document.querySelectorAll("[data-rm-path]").forEach(b => {
+    b.onclick = async () => {
+      const idx = Number(b.dataset.rmPath);
+      collectRestic();
+      const job = cfg.restic[idx];
+      job.paths = job.paths.filter(p => p !== b.dataset.path);
+      try {
+        cfg = await inv("config_save", { cfg });
+        await loadCfg();
+        toast("Ordner entfernt");
+        render();
+        document.querySelectorAll("#jobs details.job").forEach(d => { if (Number(d.dataset.idx) === idx) d.open = true; });
+      } catch (e) { toast(String(e), true); }
+    };
+  });
+
+  // Restore
+  const rl = $("r-load");
+  if (rl) {
+    $("r-job").onchange = (e) => {
+      restoreState = { job: e.target.value, snapshot: "", dir: "", selected: "", snaps: [], files: [], parent: "" };
+      render();
+    };
+    rl.onclick = async () => {
+      rl.disabled = true;
+      try {
+        const snaps = await inv("snapshots", { jobId: restoreState.job, limit: null });
+        restoreState.snaps = snaps.map(s => ({ id: s.id, label: snapshotLabel(s) }));
+        toast(`${snaps.length} Snapshots geladen`);
+        render();
+      } catch (e) { toast(String(e), true); rl.disabled = false; }
+    };
+    $("r-snap").onchange = (e) => {
+      restoreState.snapshot = e.target.value;
+      const job = cfg.restic.find(j => j.id === restoreState.job);
+      restoreState.dir = job && job.paths[0] ? job.paths[0] : "";
+      restoreState.files = [];
+      browse();
+    };
+    const st = $("r-search-toggle");
+    st.onclick = () => {
+      const w = $("r-searchwrap");
+      w.style.display = w.style.display === "none" ? "block" : "none";
+    };
+    $("r-search").onclick = async () => {
+      const q = $("r-query").value.trim();
+      if (!q || !restoreState.snapshot) { toast("Snapshot wählen und Begriff eingeben", true); return; }
+      try {
+        const res = await inv("search_files", { jobId: restoreState.job, snapshot: restoreState.snapshot, pattern: q });
+        const matches = [];
+        for (const r of res) for (const m of (r.matches || [])) matches.push({ ...m, snapshot: r.snapshot });
+        restoreState.dir = "";
+        restoreState.files = matches.map(m => ({ name: m.path, path: m.path, type: m.type, size: m.size }));
+        restoreState.parent = "";
+        renderFiles();
+      } catch (e) { toast(String(e), true); }
+    };
+    $("r-pick").onclick = async () => {
+      const dir = await inv("pick_folder");
+      if (dir) $("r-target").value = dir;
+    };
+    $("r-clear").onclick = () => { restoreState.selected = ""; updateSelected(); renderFiles(); };
+    $("r-do").onclick = async () => {
+      const target = $("r-target").value.trim();
+      if (!target) { toast("Bitte Zielordner wählen", true); return; }
+      if (!restoreState.snapshot) { toast("Bitte Snapshot wählen", true); return; }
+      const btn = $("r-do"); btn.disabled = true;
+      $("r-result").innerHTML = '<span class="live">läuft … das kann dauern</span>';
+      try {
+        const r = await inv("restore", {
+          jobId: restoreState.job, snapshot: restoreState.snapshot, target,
+          include: restoreState.selected || null, dryRun: $("r-dry").checked
+        });
+        const ok = r.code === 0;
+        $("r-result").innerHTML = `<div class="${ok ? "ok-text" : "bad-text"}">${ok ? "Fertig" : "Beendet mit Code " + r.code} → <span class="mono">${esc(r.target)}</span></div><pre>${esc(r.log)}</pre>`;
+        const open = $("r-open");
+        if (open) { open.style.display = "inline-flex"; open.onclick = () => inv("open_path", { path: r.target }).catch(e => toast(String(e), true)); }
+      } catch (e) {
+        $("r-result").innerHTML = `<div class="bad-text">${esc(String(e))}</div>`;
+      } finally { btn.disabled = false; }
+    };
+  }
+
+  // Settings
+  const oc = $("open-cfg");
+  if (oc) {
+    oc.onclick = () => inv("open_path", { path: st ? st.config_path : "" }).catch(e => toast(String(e), true));
+    $("copy-cfg").onclick = () => {
+      navigator.clipboard.writeText(st ? st.config_path : "").then(() => toast("Pfad kopiert")).catch(() => {});
+    };
+    $("apply-units").onclick = async () => {
+      const r = $("s-result"); r.innerHTML = '<span class="live">schreibe Units …</span>';
+      try {
+        await inv("config_save", { cfg });
+        const list = await inv("apply_units");
+        r.innerHTML = `<div class="ok-text">${list.length} Unit-Dateien geschrieben und Timer aktiviert.</div><pre>${esc(list.join("\n"))}</pre>`;
+      } catch (e) { r.innerHTML = `<div class="bad-text">${esc(String(e))}</div>`; }
+    };
+    $("disable-legacy").onclick = async () => {
+      try {
+        const list = await inv("disable_legacy_units");
+        toast("Alte Units abgeschaltet: " + list.join(", "));
+      } catch (e) { toast(String(e), true); }
+    };
+    $("remove-units").onclick = async () => {
+      if (!confirm("Alle backup-status-Units entfernen? Die Konfiguration bleibt erhalten.")) return;
+      try { await inv("remove_units"); toast("Units entfernt"); }
+      catch (e) { toast(String(e), true); }
+    };
+  }
+}
+
+async function boot() {
+  nav();
+  try { cfg = await inv("config_get"); } catch (e) { cfg = { settings: {}, restic: [], sync: [] }; }
+  await loadFast();
+  render();
+  inv("ready").catch(() => {});
+  loadFull(false).then(render);
+  setInterval(async () => { await loadFast(); render(); }, 20000);
+}
+
+boot();
 </script>
 </body>
 </html>
