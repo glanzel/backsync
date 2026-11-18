@@ -214,6 +214,23 @@ pub fn log_path(cfg: &Config, kind: &str, id: &str) -> PathBuf {
     log_dir(cfg).join(format!("{}-{}.log", kind, unit_id(id)))
 }
 
+/// Zusätzliche Logdatei der übernommenen Altinstallation, damit Verlauf und
+/// Status direkt nach dem Umstieg nicht leer sind.
+pub fn legacy_log(kind: &str) -> Option<PathBuf> {
+    let h = home();
+    let path = match kind {
+        "restic" => h.join(".local/state/restic/backup.log"),
+        "sync" => h.join(".local/state/media-sync/sync.log"),
+        "watchdog" => h.join(".local/state/watchdog/watchdog.log"),
+        _ => return None,
+    };
+    if path.exists() {
+        Some(path)
+    } else {
+        None
+    }
+}
+
 pub fn alarm_path(cfg: &Config) -> PathBuf {
     if !cfg.settings.alarm_file.is_empty() {
         return PathBuf::from(expand(&cfg.settings.alarm_file));

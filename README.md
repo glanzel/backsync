@@ -9,6 +9,11 @@ TOML-Datei; die Oberfläche ist nur ein bequemer Editor dafür.
   optional mit Sicherungsordner für gelöschte Dateien
 - **Wiederherstellen**: Snapshots durchsuchen, Dateien ansehen, einzeln oder
   komplett zurückholen – inklusive Probelauf
+- **Verlauf**: eine Datei über alle Snapshots suchen und je Datei die passende
+  Version auswählen
+- **Prüfen und Aufräumen**: `restic check` (optional mit Datenprüfung) und
+  `restic prune` direkt aus der Oberfläche oder per CLI, `restic init` für neue
+  Repositories
 - Erzeugt aus der Konfiguration **systemd-Timer** (kein Cron, kein Dauerprozess)
 - Funktioniert vollständig **ohne Oberfläche** (`backup-status run …`)
 
@@ -86,21 +91,33 @@ backup-status status [--full]               # Status als JSON
 backup-status snapshots dokumente
 backup-status ls dokumente latest /home/glanzel/dok
 backup-status search dokumente latest rechnung.pdf
+backup-status history dokumente 'Rechnung*'      # Verlauf über alle Snapshots
+backup-status check dokumente [--read-data]      # Repository prüfen
+backup-status prune dokumente                    # nicht benötigte Daten entfernen
+backup-status init dokumente                     # Repository anlegen
 backup-status restore dokumente latest ~/wiederhergestellt --include /home/glanzel/dok/Steuer
 ```
 
-`run` und `restore` schreiben nach `~/.local/state/backup-status/logs/`.
-`status` ist das, was auch die Oberfläche nutzt.
+`run`, `restore`, `check`, `prune` und `init` schreiben nach
+`~/.local/state/backup-status/logs/`. `status` ist das, was auch die Oberfläche
+nutzt; der Verlauf wird aus diesen Logs aufgebaut, bei einer übernommenen
+Altinstallation zusätzlich aus `~/.local/state/restic/backup.log` und
+`~/.local/state/media-sync/sync.log`.
 
 ## Oberfläche
 
-Fünf Bereiche: **Übersicht**, **Backup**, **Sync**, **Wiederherstellen**,
-**Einstellungen**.
+Sechs Bereiche: **Übersicht**, **Backup**, **Sync**, **Wiederherstellen**,
+**Verlauf**, **Einstellungen**. Aufbau wie bei Replicaro: Top-Navigation,
+linke Zeitleiste mit den letzten Läufen, Hero-Zeile mit Kennzahlen und
+Filter-Reitern, darunter flache Listen statt Karten.
 
 - Jobs anlegen, Ordner hinzufügen/entfernen, Zeitpläne und Aufbewahrung ändern
   → wird sofort in `config.toml` gespeichert
 - Wiederherstellen: Snapshot wählen, im Snapshot browsen oder nach Dateien
   suchen, Zielordner wählen, optional Probelauf
+- Verlauf: Datei über alle Snapshots suchen, je Treffer eine Version wählen und
+  mehrere Dateien gesammelt wiederherstellen
+- Backup-Jobs: jetzt sichern, prüfen, aufräumen, Repository anlegen
 - Einstellungen: Wächter-Schwellen, Units schreiben/entfernen, alte Units
   abschalten
 

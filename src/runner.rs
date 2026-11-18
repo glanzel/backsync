@@ -212,6 +212,13 @@ pub fn run_restic_job(cfg: &Config, job: &ResticJob) -> Result<i32, String> {
     if code != 0 {
         return Ok(code);
     }
+    let has_policy = job.keep_daily.is_some()
+        || job.keep_weekly.is_some()
+        || job.keep_monthly.is_some()
+        || job.keep_yearly.is_some();
+    if !has_policy {
+        return Ok(0);
+    }
     let forget = restic_args_forget(job);
     let forget_ref: Vec<&str> = forget.iter().map(|s| s.as_str()).collect();
     let code = exec::run_logged(
@@ -431,6 +438,7 @@ pub fn restic_ls(
     Ok(nodes)
 }
 
+/// `snapshot` leer lassen, um über alle Snapshots zu suchen.
 pub fn restic_search(
     cfg: &Config,
     job: &ResticJob,
@@ -439,19 +447,82 @@ pub fn restic_search(
 ) -> Result<Vec<serde_json::Value>, String> {
     let bin = restic_bin(cfg);
     let env = restic_env(cfg, job);
-    let args = [
-        "find".to_string(),
-        "--json".to_string(),
-        "--snapshot".to_string(),
-        snapshot.to_string(),
-        pattern.to_string(),
-    ];
+    let mut args = vec!["find".to_string(), "--json".to_string(), "-l".to_string()];
+    if !snapshot.trim().is_empty() {
+        args.push("--snapshot".into());
+        args.push(snapshot.to_string());
+    }
+    if !job.host.is_empty() && snapshot.trim().is_empty() {
+        args.push("--host".into());
+        args.push(job.host.clone());
+    }
+    args.push(pattern.to_string());
     let args_ref: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
-    let out = exec::run(&bin, &args_ref, &env, Duration::from_secs(120));
+    let out = exec::run(&bin, &args_ref, &env, Duration::from_secs(180));
     if !out.ok() {
         return Err(out.stderr.trim().to_string());
     }
     Ok(serde_json::from_str(&out.stdout).unwrap_or_default())
+}
+
+/// Sucht eine Datei über alle Snapshots und liefert flache Treffer.
+pub fn restic_history(
+    cfg: &Config,
+    job: &ResticJob,
+    pattern: &str,
+) -> Result<Vec<serde_json::Value>, String> {
+    let blocks = restic_search(cfg, job, "", pattern)?;
+    let mut out = Vec::new();
+    for block in blocks {
+        let sid = block["snapshot"].as_str().unwrap_or("").to_string();
+        let short: String = sid.chars().take(8).collect();
+        for m in block["matches"].as_array().cloned().unwrap_or_default() {
+            out.push(serde_json::json!({
+                "snapshot": sid,
+                "short_id": short,
+                "path": m["path"],
+                "name": m["path"].as_str().unwrap_or("").rsplit('/').next().unwrap_or(""),
+                "type": m["type"],
+                "size": m["size"],
+                "mtime": m["mtime"],
+            }));
+        }
+    }
+    Ok(out)
+}
+
+/// Prüft das Repository (restic check, optional mit Datenprüfung).
+pub fn restic_check(cfg: &Config, job: &ResticJob, read_data: bool) -> Result<i32, String> {
+    let bin = restic_bin(cfg);
+    let env = restic_env(cfg, job);
+    let log = config::log_path(cfg, "check", &job.id);
+    let mut args = vec!["check".to_string()];
+    if read_data {
+        args.push("--read-data-subset".into());
+        args.push("5%".into());
+    }
+    let args_ref: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+    exec::run_logged(&bin, &args_ref, &env, Duration::from_secs(12 * 3600), &log)
+}
+
+/// Entfernt nicht mehr benötigte Daten (restic prune).
+pub fn restic_prune(cfg: &Config, job: &ResticJob) -> Result<i32, String> {
+    let bin = restic_bin(cfg);
+    let env = restic_env(cfg, job);
+    let log = config::log_path(cfg, "prune", &job.id);
+    let args = ["prune".to_string()];
+    let args_ref: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+    exec::run_logged(&bin, &args_ref, &env, Duration::from_secs(12 * 3600), &log)
+}
+
+/// Legt ein neues Repository an.
+pub fn restic_init(cfg: &Config, job: &ResticJob) -> Result<i32, String> {
+    let bin = restic_bin(cfg);
+    let env = restic_env(cfg, job);
+    let log = config::log_path(cfg, "init", &job.id);
+    let args = ["init".to_string()];
+    let args_ref: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+    exec::run_logged(&bin, &args_ref, &env, Duration::from_secs(600), &log)
 }
 
 pub fn restic_restore(

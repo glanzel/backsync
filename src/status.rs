@@ -32,9 +32,23 @@ pub struct ResticStatus {
     pub repository: String,
     pub paths: Vec<String>,
     pub snapshot: Option<SnapshotInfo>,
+    pub snapshots: u64,
+    pub history: Vec<HistoryEntry>,
+    pub progress: String,
     pub error: String,
     #[serde(flatten)]
     pub unit: UnitInfo,
+}
+
+#[derive(Serialize, Default, Clone)]
+pub struct HistoryEntry {
+    pub kind: String,
+    pub name: String,
+    pub detail: String,
+    pub when: String,
+    #[serde(default)]
+    pub ts: String,
+    pub status: String,
 }
 
 #[derive(Serialize, Default)]
@@ -45,6 +59,7 @@ pub struct SyncStatus {
     pub source: String,
     pub target: String,
     pub mode: String,
+    pub progress: String,
     pub error: String,
     #[serde(flatten)]
     pub unit: UnitInfo,
@@ -73,6 +88,13 @@ pub struct Status {
     pub binary: String,
     pub restic_jobs: Vec<serde_json::Value>,
     pub sync_jobs: Vec<serde_json::Value>,
+    pub jobs_total: u64,
+    pub jobs_ok: u64,
+    pub jobs_failed: u64,
+    pub jobs_paused: u64,
+    pub last_success: String,
+    pub history: Vec<HistoryEntry>,
+    pub checks: Vec<HistoryEntry>,
 }
 
 struct CachedJson {
@@ -167,8 +189,9 @@ fn unit_info(unit: &str, timer: &str, log: &str, lines: usize) -> UnitInfo {
     }
 }
 
+/// Erwartet die nach Zeit aufsteigend sortierte Snapshot-Liste.
 fn snapshot_of(v: serde_json::Value) -> Option<SnapshotInfo> {
-    let first = v.as_array()?.first()?;
+    let first = v.as_array()?.last()?;
     let time = first["time"].as_str().unwrap_or("");
     let bytes = first["summary"]["total_bytes_processed"]
         .as_f64()
@@ -253,6 +276,50 @@ pub fn collect(force: bool, network: bool) -> Status {
         .trim()
         .to_string();
 
+    for r in &s.restic {
+        s.jobs_total += 1;
+        if !r.enabled {
+            s.jobs_paused += 1;
+        } else if r.unit.failed {
+            s.jobs_failed += 1;
+        } else if r.unit.result == "success" {
+            s.jobs_ok += 1;
+        }
+        s.history.extend(r.history.clone());
+    }
+    for y in &s.sync {
+        s.jobs_total += 1;
+        if !y.enabled {
+            s.jobs_paused += 1;
+        } else if y.unit.failed {
+            s.jobs_failed += 1;
+        } else if y.unit.result == "success" {
+            s.jobs_ok += 1;
+        }
+    }
+    s.history.sort_by(|a, b| b.ts.cmp(&a.ts));
+    s.history.truncate(14);
+
+    s.checks = s
+        .history
+        .iter()
+        .filter(|h| h.kind != "Backup")
+        .cloned()
+        .collect();
+
+    s.last_success = s
+        .restic
+        .iter()
+        .filter_map(|r| r.snapshot.as_ref().map(|x| x.time.clone()))
+        .max()
+        .or_else(|| {
+            s.history
+                .iter()
+                .find(|h| h.kind == "Backup" && h.status == "success")
+                .map(|h| h.when.clone())
+        })
+        .unwrap_or_default();
+
     s.restic_jobs = serde_json::to_value(&cfg.restic_jobs)
         .unwrap_or_default()
         .as_array()
@@ -270,16 +337,12 @@ fn restic_status(cfg: &Config, job: &ResticJob, force: bool, network: bool) -> R
     let key = format!("restic:{}", job.id);
     let data = if network {
         cached(&key, force, || {
-            runner::restic_snapshots(cfg, job, Some(1))
-                .ok()
-                .or_else(|| {
-                    runner::restic_snapshots(cfg, job, None).ok().map(|v| {
-                        let mut arr: Vec<serde_json::Value> =
-                            v.as_array().cloned().unwrap_or_default();
-                        arr.sort_by_key(|x| x["time"].as_str().unwrap_or("").to_string());
-                        arr.pop().map(|last| vec![last]).unwrap_or_default().into()
-                    })
-                })
+            // Ein Abruf liefert Anzahl und neuesten Snapshot zugleich.
+            runner::restic_snapshots(cfg, job, None).ok().map(|v| {
+                let mut arr: Vec<serde_json::Value> = v.as_array().cloned().unwrap_or_default();
+                arr.sort_by_key(|x| x["time"].as_str().unwrap_or("").to_string());
+                serde_json::Value::Array(arr)
+            })
         })
     } else {
         peek(&key)
@@ -294,12 +357,35 @@ fn restic_status(cfg: &Config, job: &ResticJob, force: bool, network: bool) -> R
         error = "Repository nicht erreichbar oder Passwort falsch".into();
     }
 
+    let log_path = config::log_path(cfg, "restic", &job.id);
     let unit = unit_info(
         &config::restic_unit(job),
         &config::restic_timer(job),
-        &config::log_path(cfg, "restic", &job.id).to_string_lossy(),
+        &log_path.to_string_lossy(),
         5,
     );
+    let log = merged_log(&log_path, config::legacy_log("restic"));
+    let progress = if unit.active {
+        live_progress(&log)
+    } else {
+        String::new()
+    };
+    let mut history = history_from_log(&log, &job.name, "Backup");
+    for (kind, label) in [("check", "Prüfung"), ("prune", "Aufräumen")] {
+        let p = config::log_path(cfg, kind, &job.id);
+        if let Ok(text) = std::fs::read_to_string(&p) {
+            let mut extra = history_from_log(&text, &job.name, label);
+            extra.truncate(2);
+            history.extend(extra);
+        }
+    }
+    history.sort_by(|a, b| b.ts.cmp(&a.ts));
+    history.truncate(10);
+
+    let snapshots = data
+        .as_ref()
+        .and_then(|v| v.as_array().map(|a| a.len() as u64))
+        .unwrap_or(0);
 
     ResticStatus {
         id: job.id.clone(),
@@ -308,9 +394,110 @@ fn restic_status(cfg: &Config, job: &ResticJob, force: bool, network: bool) -> R
         repository: job.repository.clone(),
         paths: job.paths.clone(),
         snapshot,
+        snapshots,
+        history,
+        progress,
         error,
         unit,
     }
+}
+
+/// Letzte Fortschrittszeile eines laufenden restic-Laufs.
+/// Liest die eigene Logdatei und, falls vorhanden, die der Altinstallation.
+fn merged_log(own: &std::path::Path, legacy: Option<std::path::PathBuf>) -> String {
+    let mut text = String::new();
+    if let Some(l) = legacy {
+        text.push_str(&std::fs::read_to_string(l).unwrap_or_default());
+        if !text.ends_with('\n') {
+            text.push('\n');
+        }
+    }
+    text.push_str(&std::fs::read_to_string(own).unwrap_or_default());
+    text
+}
+
+fn live_progress(log: &str) -> String {
+    log.lines()
+        .rev()
+        .take(200)
+        .find(|l| {
+            let l = l.trim();
+            l.contains("Files:")
+                || l.contains("processed")
+                || (l.contains('%') && (l.contains("GiB") || l.contains("MiB")))
+        })
+        .unwrap_or("")
+        .trim()
+        .to_string()
+}
+
+/// Baut aus Logzeilen eine kurze Ereignisliste (Backups, Restores, Prüfungen).
+fn history_from_log(log: &str, name: &str, kind: &str) -> Vec<HistoryEntry> {
+    let mut out = Vec::new();
+    for line in log.lines().rev() {
+        let t = line.trim();
+        if out.len() >= 8 {
+            break;
+        }
+        if t.contains("snapshot ") && t.contains(" saved") {
+            let id = t
+                .split("snapshot ")
+                .nth(1)
+                .and_then(|x| x.split_whitespace().next())
+                .unwrap_or("");
+            out.push(HistoryEntry {
+                kind: kind.into(),
+                name: name.into(),
+                detail: if id.is_empty() {
+                    String::new()
+                } else {
+                    id.to_string()
+                },
+                when: String::new(),
+                ts: String::new(),
+                status: "success".into(),
+            });
+        } else if t.starts_with("=== ")
+            && (t.contains("start:") || t.contains("Start:") || t.contains(" Lauf"))
+        {
+            // Zeitstempel für den zuletzt gefundenen Eintrag nachreichen
+            if let Some(last) = out.last_mut() {
+                if last.when.is_empty() {
+                    let ts = t
+                        .trim_start_matches("=== ")
+                        .split_whitespace()
+                        .next()
+                        .unwrap_or("");
+                    last.ts = ts.to_string();
+                    last.when = exec::human(ts);
+                }
+            }
+        } else if kind != "Backup" && t.starts_with("=== ") && t.contains("ende: Code 0") {
+            let ts = t
+                .trim_start_matches("=== ")
+                .split_whitespace()
+                .next()
+                .unwrap_or("");
+            out.push(HistoryEntry {
+                kind: kind.into(),
+                name: name.into(),
+                detail: String::new(),
+                when: exec::human(ts),
+                ts: ts.to_string(),
+                status: "success".into(),
+            });
+        } else if t.contains("Fatal:") || t.contains("FEHLER") {
+            out.push(HistoryEntry {
+                kind: kind.into(),
+                name: name.into(),
+                detail: t.chars().take(120).collect(),
+                when: String::new(),
+                ts: String::new(),
+                status: "failed".into(),
+            });
+        }
+    }
+    out
 }
 
 fn sync_status(cfg: &Config, job: &SyncJob) -> SyncStatus {
@@ -321,11 +508,16 @@ fn sync_status(cfg: &Config, job: &SyncJob) -> SyncStatus {
         &log_path.to_string_lossy(),
         5,
     );
-    let log = std::fs::read_to_string(&log_path).unwrap_or_default();
+    let log = merged_log(&log_path, config::legacy_log("sync"));
+    let progress = if unit.active {
+        live_progress(&log)
+    } else {
+        String::new()
+    };
     if let Some(line) = log
         .lines()
         .rev()
-        .find(|l| l.contains("Transferred:") || l.contains("Sync fertig"))
+        .find(|l| l.contains("Sync fertig") || l.contains("Transferred:"))
     {
         unit.tail = line.trim().to_string();
     }
@@ -337,6 +529,7 @@ fn sync_status(cfg: &Config, job: &SyncJob) -> SyncStatus {
         source: job.source.clone(),
         target: job.target.clone(),
         mode: job.mode.clone(),
+        progress,
         error: String::new(),
         unit,
     }

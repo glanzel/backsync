@@ -8,223 +8,296 @@
   :root {
     color-scheme: dark;
     --bg: #0a0c10;
-    --panel: #10151c;
-    --panel-2: #141b23;
-    --raise: #18212b;
-    --line: #232e3a;
-    --line-strong: #35434f;
+    --line: #1a2128;
+    --line-2: #232c35;
     --text: #edf2f5;
     --muted: #a5b2bf;
     --dim: #6b7b89;
     --teal: #1a8a9e;
-    --teal-strong: #147487;
     --teal-light: #50bfcc;
-    --red: #e05d5d;
+    --green: #54e0a8;
+    --red: #ef8f8f;
     --amber: #d9a441;
-    --green: #4ec98a;
     --blue: #5b9bd5;
-    --radius: 12px;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body {
     margin: 0;
-    font: 14px/1.55 "Schibsted Grotesk", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
     background: var(--bg);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
   }
-  .app { display: flex; height: 100vh; overflow: hidden; }
+  button, input, select, textarea { font: inherit; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #1e2831; border-radius: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::selection { background: rgba(80,191,204,.25); }
 
-  /* Sidebar */
-  aside {
-    width: 212px; flex: 0 0 212px;
-    background: linear-gradient(180deg, #0d1218, #0a0c10 70%);
-    border-right: 1px solid var(--line);
-    display: flex; flex-direction: column;
-    padding: 20px 14px;
+  /* ---------- Top navigation ---------- */
+  .topbar {
+    display: flex; align-items: center; gap: 26px;
+    height: 58px; padding: 0 26px;
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
   }
-  .brand { display: flex; align-items: center; gap: 10px; padding: 2px 8px 20px; }
+  .brand { display: flex; align-items: center; gap: 9px; }
   .brand .mark {
-    width: 30px; height: 30px; border-radius: 9px;
-    background: radial-gradient(circle at 30% 25%, var(--teal-light), var(--teal-strong));
-    box-shadow: 0 4px 14px rgba(26,138,158,.35);
-    display: grid; place-items: center; color: #04171b; font-weight: 700; font-size: 15px;
+    width: 22px; height: 22px; border-radius: 7px;
+    background: linear-gradient(150deg, var(--teal-light), var(--teal));
+    display: grid; place-items: center;
+    color: #04171b; font-weight: 800; font-size: 12px;
   }
-  .brand h1 { font-size: 16px; margin: 0; font-weight: 650; letter-spacing: .01em; }
-  .brand span { display: block; font-size: 10.5px; color: var(--dim); letter-spacing: .09em; text-transform: uppercase; }
-  nav { display: flex; flex-direction: column; gap: 3px; }
+  .brand b { font-size: 15px; letter-spacing: -.01em; font-weight: 650; }
+  nav { display: flex; gap: 2px; }
   nav button {
     all: unset; cursor: pointer;
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 11px; border-radius: 9px;
+    padding: 7px 12px; border-radius: 7px;
     color: var(--muted); font-size: 13.5px; font-weight: 500;
+    white-space: nowrap;
   }
-  nav button svg { width: 16px; height: 16px; opacity: .8; }
-  nav button:hover { background: #131b23; color: var(--text); }
-  nav button.on { background: #16232c; color: var(--text); box-shadow: inset 0 0 0 1px #23323e; }
-  nav button.on svg { color: var(--teal-light); opacity: 1; }
-  .side-foot { margin-top: auto; padding: 10px 8px 0; font-size: 11px; color: var(--dim); line-height: 1.5; }
-  .side-foot .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--dim); margin-right: 5px; }
-  .side-foot .dot.live { background: var(--green); }
+  nav button:hover { color: var(--text); background: #12171d; }
+  nav button.on { color: var(--text); background: #141c23; box-shadow: inset 0 -2px 0 var(--teal); border-radius: 7px 7px 0 0; }
+  .topbar .spacer { flex: 1; }
+  .topbar .meta { color: var(--dim); font-size: 12px; text-align: right; line-height: 1.35; }
+  .topbar .meta b { color: var(--muted); font-weight: 500; }
+  .icon-btn {
+    all: unset; cursor: pointer; width: 30px; height: 30px; border-radius: 8px;
+    display: grid; place-items: center; color: var(--muted);
+  }
+  .icon-btn:hover { background: #141c23; color: var(--text); }
+  .icon-btn svg { width: 17px; height: 17px; }
 
-  /* Main */
-  main { flex: 1; overflow: auto; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 26px 30px 60px; }
-  .topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
-  .topbar h2 { font-size: 22px; margin: 0; font-weight: 650; letter-spacing: -.01em; }
-  .topbar .sub { color: var(--muted); font-size: 12.5px; }
-  .spacer { flex: 1; }
-
-  button.btn {
+  /* ---------- Buttons ---------- */
+  .btn {
     all: unset; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 8px 14px; border-radius: 9px;
-    background: var(--teal); color: #04171b; font-weight: 600; font-size: 13px;
-    transition: background .15s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 8px 14px; border-radius: 8px;
+    background: var(--teal); color: #04171b;
+    font-size: 13px; font-weight: 600; white-space: nowrap;
   }
-  button.btn:hover { background: var(--teal-light); }
-  button.btn.ghost { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong); }
-  button.btn.ghost:hover { background: var(--raise); }
-  button.btn.danger { background: transparent; color: #f0a0a0; box-shadow: inset 0 0 0 1px #5a2a2a; }
-  button.btn.danger:hover { background: #2a1414; }
-  button.btn.small { padding: 5px 10px; font-size: 12px; border-radius: 7px; }
-  button.btn:disabled { opacity: .45; cursor: default; }
+  .btn:hover { background: var(--teal-light); }
+  .btn.ghost { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+  .btn.ghost:hover { background: #141c23; box-shadow: inset 0 0 0 1px #2e3b46; }
+  .btn.quiet { background: transparent; color: var(--muted); padding: 6px 9px; font-weight: 500; }
+  .btn.quiet:hover { color: var(--text); background: #12171d; }
+  .btn.danger { background: transparent; color: var(--red); box-shadow: inset 0 0 0 1px #4a2424; }
+  .btn.danger:hover { background: #20100f; }
+  .btn.sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+  .btn:disabled { opacity: .45; cursor: default; }
 
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
-  .card {
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: var(--radius); padding: 18px;
+  /* ---------- Layout ---------- */
+  main { display: flex; min-height: calc(100vh - 58px); }
+  .rail {
+    width: 236px; flex: 0 0 236px;
+    border-right: 1px solid var(--line);
+    padding: 26px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+    position: sticky; top: 58px; height: calc(100vh - 58px); overflow: auto;
   }
-  .card h3 {
-    margin: 0 0 4px; font-size: 14.5px; font-weight: 600;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .card .cap { color: var(--dim); font-size: 12px; margin-bottom: 12px; word-break: break-all; }
-  .card pre {
-    background: #0b1015; border: 1px solid #1d2731; border-radius: 8px;
-    padding: 9px 10px; font-size: 11px; line-height: 1.5;
-    white-space: pre-wrap; overflow: auto; max-height: 96px; color: #94a4b3; margin: 12px 0 0;
-  }
-  .rows { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
-  .row { display: flex; gap: 12px; align-items: baseline; font-size: 13px; }
-  .row .k { color: var(--dim); width: 118px; flex: 0 0 118px; }
-  .row .v { color: var(--text); word-break: break-word; }
-  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  .content { flex: 1; min-width: 0; padding: 30px 34px 70px; }
+  .content.narrow { max-width: 1000px; }
 
-  .pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 3px 9px; border-radius: 999px;
-    font-size: 11.5px; font-weight: 600; letter-spacing: .01em;
-    background: #1b2530; color: var(--muted);
+  .gauge { display: flex; align-items: center; gap: 14px; padding-bottom: 20px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+  .gauge .ring {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 12px; font-weight: 700;
+    color: var(--teal-light);
+    background: conic-gradient(var(--teal-light) var(--p, 100%), #1a2229 0);
+    position: relative;
   }
-  .pill.ok { background: rgba(78,201,138,.12); color: var(--green); }
-  .pill.bad { background: rgba(224,93,93,.13); color: #ef9c9c; }
-  .pill.warn { background: rgba(217,164,65,.13); color: var(--amber); }
-  .pill.run { background: rgba(91,155,213,.14); color: var(--blue); }
-  .pill.off { background: #1a222b; color: var(--dim); }
-
-  .bar { height: 7px; border-radius: 999px; background: #1d2731; overflow: hidden; margin: 12px 0 6px; }
-  .bar > div { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--teal-strong), var(--teal-light)); }
-
-  .alarm {
-    background: linear-gradient(180deg, #23100f, #1a0d0c);
-    border: 1px solid #5c2523; border-radius: var(--radius);
-    padding: 15px 17px; margin-bottom: 18px;
+  .gauge .ring::after {
+    content: ""; position: absolute; inset: 5px; border-radius: 50%; background: var(--bg);
   }
-  .alarm strong { color: #f0b3b0; display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 13.5px; }
-  .alarm pre { background: transparent; border: 0; color: #d9a5a2; padding: 0; max-height: none; margin: 0; }
+  .gauge .ring span { position: relative; z-index: 1; }
+  .gauge .lbl { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+  .gauge .val { font-size: 13px; font-weight: 600; }
 
-  /* Forms */
-  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-  .field label { font-size: 11.5px; color: var(--muted); font-weight: 500; letter-spacing: .02em; }
+  .rail h4 {
+    font-size: 10.5px; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--dim); font-weight: 600; margin: 18px 0 8px;
+  }
+  .titem { display: flex; gap: 10px; align-items: flex-start; padding: 5px 0; cursor: pointer; }
+  .titem:hover .tl { color: var(--text); }
+  .titem .clock { font-size: 11.5px; color: var(--dim); width: 62px; flex: 0 0 62px; font-variant-numeric: tabular-nums; padding-top: 1px; }
+  .titem .dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex: 0 0 6px; background: var(--teal-light); }
+  .titem .dot.bad { background: var(--red); }
+  .titem .tl { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .titem .tn { font-size: 11.5px; color: var(--dim); }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-bottom: 26px; border-bottom: 1px solid var(--line); }
+  .hero h2 { margin: 0 0 6px; font-size: 30px; font-weight: 650; letter-spacing: -.02em; }
+  .hero p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  .hero p b { color: var(--text); font-weight: 600; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-bottom: 1px solid var(--line); }
+  .stat { padding: 22px 0; }
+  .stat + .stat { padding-left: 26px; border-left: 1px solid var(--line); }
+  .stat .n { font-size: 26px; font-weight: 650; letter-spacing: -.02em; line-height: 1.1; }
+  .stat .n.bad { color: var(--red); }
+  .stat .n.ok { color: var(--green); }
+  .stat .k { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-top: 6px; }
+
+  /* ---------- Filter tabs ---------- */
+  .tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--line); margin-top: 4px; }
+  .tabs button {
+    all: unset; cursor: pointer; padding: 13px 0 12px;
+    font-size: 13px; color: var(--dim); font-weight: 500;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tabs button:hover { color: var(--muted); }
+  .tabs button.on { color: var(--text); border-bottom-color: var(--teal-light); }
+
+  /* ---------- Flat rows ---------- */
+  .rowlist { display: flex; flex-direction: column; }
+  .row {
+    display: grid; grid-template-columns: 18px 1fr auto auto;
+    align-items: center; gap: 14px;
+    padding: 13px 4px; border-bottom: 1px solid var(--line);
+  }
+  .row:hover { background: #0d1116; }
+  .row .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal-light); }
+  .row .dot.bad { background: var(--red); }
+  .row .dot.warn { background: var(--amber); }
+  .row .dot.off { background: #3a4650; }
+  .row .main { min-width: 0; }
+  .row .title { font-size: 13.5px; font-weight: 550; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .sub { font-size: 12px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .row .when { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .row .tail { font-size: 12px; color: var(--muted); }
+  .row .act { display: flex; gap: 4px; justify-content: flex-end; }
+  .row .prog { font-size: 11.5px; color: var(--teal-light); margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Forms ---------- */
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 13px; }
+  .field > label { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
   input[type=text], input[type=number], select, textarea {
-    width: 100%; background: #0c1116; color: var(--text);
-    border: 1px solid var(--line); border-radius: 8px;
-    padding: 8px 10px; font: inherit; font-size: 13px;
+    width: 100%; background: #0c1015; color: var(--text);
+    border: 1px solid var(--line-2); border-radius: 7px;
+    padding: 8px 10px; font-size: 13px;
   }
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--teal); }
-  textarea { resize: vertical; min-height: 62px; font-family: ui-monospace, monospace; font-size: 12px; }
-  .form-grid { display: grid; gap: 0 14px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
-  .check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin-bottom: 10px; }
-  .check input { accent-color: var(--teal); width: 15px; height: 15px; }
-  .hint { font-size: 11.5px; color: var(--dim); margin: 4px 0 0; }
+  textarea { resize: vertical; min-height: 58px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  .fgrid { display: grid; gap: 0 16px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .check { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); margin: 0 18px 10px 0; cursor: pointer; }
+  .check input { accent-color: var(--teal); width: 14px; height: 14px; }
+  .hint { font-size: 12px; color: var(--dim); margin: 12px 0 0; line-height: 1.6; }
+  .hint code, .mono { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; color: var(--muted); }
+  .section-title {
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--dim); font-weight: 600; margin: 0 0 14px;
+  }
+  .panel { border-top: 1px solid var(--line); padding: 26px 0 0; margin-top: 26px; }
+  .panel:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
 
-  .job {
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
-  }
-  .job > summary {
-    list-style: none; cursor: pointer; padding: 15px 18px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .job > summary::-webkit-details-marker { display: none; }
-  .job > summary .title { font-weight: 600; font-size: 14px; }
-  .job > summary .where { color: var(--dim); font-size: 12px; }
-  .job > summary .chev { margin-left: auto; color: var(--dim); transition: transform .18s; }
-  .job[open] > summary .chev { transform: rotate(90deg); }
-  .job-body { padding: 0 18px 18px; border-top: 1px solid var(--line); padding-top: 16px; }
-  .paths { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 12px; }
-  .path {
+  .pathrow {
     display: flex; align-items: center; gap: 10px;
-    background: #0c1116; border: 1px solid var(--line);
-    border-radius: 8px; padding: 7px 11px; font-size: 12.5px;
+    padding: 7px 0; border-bottom: 1px solid var(--line);
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px;
   }
-  .path .p { flex: 1; word-break: break-all; font-family: ui-monospace, monospace; font-size: 12px; }
-  .path button { all: unset; cursor: pointer; color: var(--dim); font-size: 15px; line-height: 1; padding: 2px 4px; border-radius: 5px; }
-  .path button:hover { color: #ef9c9c; background: #241517; }
+  .pathrow .p { flex: 1; word-break: break-all; }
+  .pathrow button { all: unset; cursor: pointer; color: var(--dim); padding: 2px 5px; border-radius: 4px; font-size: 14px; }
+  .pathrow button:hover { color: var(--red); background: #1b1113; }
 
-  .list { display: flex; flex-direction: column; gap: 2px; }
-  .item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 11px; border-radius: 8px; font-size: 13px;
-    cursor: pointer; border: 1px solid transparent;
+  .jobhead {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 4px; border-bottom: 1px solid var(--line); cursor: pointer;
   }
-  .item:hover { background: var(--panel-2); }
-  .item.sel { background: #13232b; border-color: #24404c; }
-  .item .nm { flex: 1; word-break: break-all; }
-  .item .meta { color: var(--dim); font-size: 11.5px; white-space: nowrap; }
-  .item.dir .nm::before { content: "▸ "; color: var(--teal-light); }
-  .item.parent .nm { color: var(--muted); }
+  .jobhead:hover { background: #0d1116; }
+  .jobhead .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal-light); flex: 0 0 8px; }
+  .jobhead .dot.off { background: #3a4650; }
+  .jobhead .dot.bad { background: var(--red); }
+  .jobhead .grow { flex: 1; min-width: 0; }
+  .jobhead .name { font-size: 14.5px; font-weight: 600; }
+  .jobhead .desc { font-size: 12px; color: var(--dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .jobhead .chev { color: var(--dim); transition: transform .15s; }
+  .jobhead.open .chev { transform: rotate(90deg); }
+  .jobbody { padding: 22px 0 26px; border-bottom: 1px solid var(--line); }
 
-  .split { display: grid; grid-template-columns: 300px 1fr; gap: 14px; align-items: start; }
-  .crumbs { display: flex; gap: 4px; flex-wrap: wrap; font-size: 12px; color: var(--dim); margin-bottom: 10px; }
-  .crumbs span { cursor: pointer; color: var(--teal-light); }
-  .crumbs span:hover { text-decoration: underline; }
-  .empty { color: var(--dim); font-size: 12.5px; padding: 16px 4px; text-align: center; }
-  .row-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-  .live { color: var(--dim); font-size: 11.5px; }
-  .result { margin-top: 12px; font-size: 12px; }
-  .result pre { max-height: 180px; }
-  .ok-text { color: var(--green); }
-  .bad-text { color: #ef9c9c; }
+  /* ---------- Restore / history ---------- */
+  .split { display: grid; grid-template-columns: 300px 1fr; gap: 0; border-top: 1px solid var(--line); }
+  .split .pane { min-height: 220px; }
+  .split .pane:first-child { max-height: 460px; overflow: auto; }
+  .pane { padding: 20px 0; }
+  .pane + .pane { border-left: 1px solid var(--line); padding-left: 26px; margin-left: 26px; }
+  .pane h3 { margin: 0 0 14px; font-size: 13px; font-weight: 600; }
+  .snap { padding: 9px 10px; border-radius: 7px; cursor: pointer; border: 1px solid transparent; }
+  .snap:hover { background: #0d1116; }
+  .snap.sel { background: #101c22; border-color: #22414b; }
+  .snap .t { font-size: 12.5px; font-weight: 550; }
+  .snap .s { font-size: 11.5px; color: var(--dim); font-family: ui-monospace, Menlo, monospace; }
+
+  .filelist { display: flex; flex-direction: column; }
+  .fitem {
+    display: flex; align-items: center; gap: 11px;
+    padding: 8px 8px; border-radius: 6px; cursor: pointer; border: 1px solid transparent;
+  }
+  .fitem:hover { background: #0d1116; }
+  .fitem.sel { background: #101c22; border-color: #22414b; }
+  .fitem .ico { width: 15px; text-align: center; color: var(--teal-light); font-size: 12px; }
+  .fitem .nm { flex: 1; min-width: 0; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fitem .sz { font-size: 11.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .crumbs { font-size: 12px; color: var(--dim); margin-bottom: 10px; display: flex; gap: 3px; flex-wrap: wrap; }
+  .crumbs span { cursor: pointer; }
+  .crumbs span:hover { color: var(--teal-light); }
+  .empty { color: var(--dim); font-size: 12.5px; padding: 26px 0; text-align: center; }
+
+  .versions { border-top: 1px solid var(--line); margin-top: 4px; }
+  .vitem { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .vitem .cb { width: 15px; height: 15px; accent-color: var(--teal); }
+  .vitem .nm { flex: 1; min-width: 0; font-size: 12.5px; }
+  .vitem .nm .p { color: var(--dim); font-size: 11.5px; font-family: ui-monospace, Menlo, monospace; }
+  .vitem select { width: auto; min-width: 180px; padding: 5px 8px; font-size: 12px; }
+
+  .result { font-size: 12px; margin-top: 14px; }
+  .result pre {
+    background: #0a0e12; border: 1px solid var(--line); border-radius: 7px;
+    padding: 10px; font-size: 11px; max-height: 170px; overflow: auto;
+    white-space: pre-wrap; color: var(--muted); margin: 8px 0 0;
+  }
+  .oktext { color: var(--green); }
+  .badtext { color: var(--red); }
+  .live { color: var(--dim); font-size: 12px; }
+
   .toast {
-    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: #17232c; border: 1px solid #2a3c49; color: var(--text);
-    padding: 10px 16px; border-radius: 9px; font-size: 13px;
-    opacity: 0; pointer-events: none; transition: all .22s; z-index: 20;
-    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 16px);
+    background: #121a21; border: 1px solid #26333d; color: var(--text);
+    padding: 10px 16px; border-radius: 8px; font-size: 13px;
+    opacity: 0; pointer-events: none; transition: .2s; z-index: 50;
+    box-shadow: 0 12px 32px rgba(0,0,0,.45);
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.err { border-color: #5c2523; color: #f0b3b0; }
-  kbd { background: #1b2530; border-radius: 4px; padding: 1px 5px; font-size: 11px; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.err { border-color: #4a2424; color: var(--red); }
+  .alarmbar {
+    display: flex; gap: 12px; align-items: flex-start;
+    border: 1px solid #4a2424; background: #150d0d; border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 22px; font-size: 12.5px; color: #e8b4b2;
+    white-space: pre-wrap;
+  }
+  .alarmbar b { color: var(--red); display: block; margin-bottom: 3px; }
 </style>
 </head>
 <body>
-<div class="app">
-  <aside>
-    <div class="brand">
-      <div class="mark">B</div>
-      <div><h1>Backup</h1><span>restic &amp; rclone</span></div>
-    </div>
-    <nav id="nav"></nav>
-    <div class="side-foot">
-      <div><span class="dot" id="dot"></span><span id="live">verbinde …</span></div>
-      <div id="cfgpath" style="margin-top:6px"></div>
-    </div>
-  </aside>
-  <main><div class="wrap" id="view"></div></main>
-</div>
+<header class="topbar">
+  <div class="brand"><div class="mark">B</div><b>Backup</b></div>
+  <nav id="nav"></nav>
+  <div class="spacer"></div>
+  <div class="meta" id="meta"></div>
+  <button class="icon-btn" id="reload" title="Neu laden">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11A8 8 0 1 0 6.3 6.3L3 9.5"/><path d="M3 4v5.5h5.5"/></svg>
+  </button>
+  <button class="icon-btn" data-page="settings" title="Einstellungen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+  </button>
+</header>
+
+<main>
+  <aside class="rail" id="rail"></aside>
+  <section class="content" id="view"></section>
+</main>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -235,21 +308,14 @@ const $ = (id) => document.getElementById(id);
 let page = "overview";
 let cfg = null;
 let st = null;
-let busy = false;
-
-const icons = {
-  overview: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
-  backup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H10l2 2h5.5A2.5 2.5 0 0 1 20 9.5v7A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z"/></svg>',
-  sync: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9a8 8 0 0 1 13.5-3.5L20 8"/><path d="M20 4v4h-4"/><path d="M20 15a8 8 0 0 1-13.5 3.5L4 16"/><path d="M4 20v-4h4"/></svg>',
-  restore: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg>',
-  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>'
-};
+let filter = "all";
 
 const pages = [
   ["overview", "Übersicht"],
   ["backup", "Backup"],
   ["sync", "Sync"],
   ["restore", "Wiederherstellen"],
+  ["history", "Verlauf"],
   ["settings", "Einstellungen"]
 ];
 
@@ -258,439 +324,580 @@ function toast(msg, err) {
   t.textContent = msg;
   t.className = "toast show" + (err ? " err" : "");
   clearTimeout(t._h);
-  t._h = setTimeout(() => { t.className = "toast"; }, 3200);
+  t._h = setTimeout(() => { t.className = "toast"; }, 3400);
 }
 
 function nav() {
   $("nav").innerHTML = pages.map(([id, label]) =>
-    `<button data-page="${id}" class="${page === id ? "on" : ""}">${icons[id]}<span>${label}</span></button>`
-  ).join("");
-  $("nav").querySelectorAll("button").forEach(b => {
-    b.onclick = () => { page = b.dataset.page; nav(); render(); };
+    `<button data-page="${id}" class="${page === id ? "on" : ""}">${label}</button>`).join("");
+  $("nav").querySelectorAll("button").forEach(b => b.onclick = () => goto(b.dataset.page));
+  document.querySelectorAll("[data-page]").forEach(b => {
+    if (b.parentElement === $("nav")) return;
+    b.onclick = () => goto(b.dataset.page);
   });
 }
+function goto(p) { page = p; nav(); render(); }
 
-function pill(u) {
-  if (u.active) return '<span class="pill run">läuft</span>';
-  if (u.failed) return '<span class="pill bad">fehlgeschlagen</span>';
-  if (u.result === "success") return '<span class="pill ok">ok</span>';
-  return '<span class="pill warn">noch nie</span>';
-}
-
-function rows(list) {
-  return `<div class="rows">${list.filter(r => r && r[1] !== undefined)
-    .map(([k, v]) => `<div class="row"><div class="k">${esc(k)}</div><div class="v">${v}</div></div>`).join("")}</div>`;
-}
-
-async function loadCfg() { cfg = await inv("config_get"); }
-async function loadFast() {
-  try { st = await inv("status_fast"); }
-  catch (e) { $("live").textContent = "Status nicht lesbar"; }
-}
-async function loadFull(force) {
-  try { st = await inv(force ? "refresh" : "status"); }
-  catch (e) { }
-}
-
-function statusHead() {
-  if (!st) return "";
-  $("dot").className = "dot live";
-  $("live").textContent = "Stand " + (st.now || "");
-  $("cfgpath").innerHTML = `<span title="${esc(st.config_path)}">Konfiguration in Datei</span>`;
-  return "";
-}
-
-/* ---------------- Übersicht ---------------- */
-function pageOverview() {
-  const s = st || {};
-  const restic = (s.restic || []).map(job => {
-    const snap = job.snapshot;
-    const extra = rows([
-      ["Repository", `<span class="mono">${esc(job.repository)}</span>`],
-      ["Letzter Snapshot", snap ? esc(snap.time) : (s.partial ? "wird geladen …" : (job.error ? `<span class="bad-text">${esc(job.error)}</span>` : "–"))],
-      ["Umfang", snap ? `${esc(snap.size)} · ${snap.files} Dateien` : "–"],
-      ["Nächster Lauf", esc(job.next || "–")]
-    ]);
-    return `<div class="card">
-      <h3>${esc(job.name)} ${job.enabled ? "" : '<span class="pill off">pausiert</span>'} ${pill(job)}</h3>
-      <div class="cap">${job.paths.length} Ordner${job.snapshot && job.snapshot.id ? " · " + esc(job.snapshot.id) : ""}</div>
-      ${extra}
-      ${job.tail ? `<pre>${esc(job.tail)}</pre>` : ""}
-      <div class="row-actions"><button class="btn small" data-run="restic" data-id="${esc(job.id)}">Jetzt sichern</button></div>
-    </div>`;
-  }).join("");
-
-  const sync = (s.sync || []).map(job => {
-    const extra = rows([
-      ["Von", `<span class="mono">${esc(job.source)}</span>`],
-      ["Nach", `<span class="mono">${esc(job.target)}</span>`],
-      ["Modus", esc(job.mode === "copy" ? "kopieren (nichts löschen)" : "synchronisieren")],
-      ["Nächster Lauf", esc(job.next || "–")]
-    ]);
-    return `<div class="card">
-      <h3>${esc(job.name)} ${job.enabled ? "" : '<span class="pill off">pausiert</span>'} ${pill(job)}</h3>
-      <div class="cap">rclone</div>
-      ${extra}
-      ${job.tail ? `<pre>${esc(job.tail)}</pre>` : ""}
-      <div class="row-actions"><button class="btn small" data-run="sync" data-id="${esc(job.id)}">Jetzt abgleichen</button></div>
-    </div>`;
-  }).join("");
-
-  const clouds = (s.clouds || []).map(c => {
-    if (!c.ok && s.partial) {
-      return `<div class="card"><h3>Speicher ${esc(c.remote)}</h3><div class="cap">wird geladen …</div></div>`;
-    }
-    if (!c.ok) {
-      return `<div class="card"><h3>Speicher ${esc(c.remote)}</h3><div class="cap bad-text">nicht erreichbar</div></div>`;
-    }
-    return `<div class="card"><h3>Speicher ${esc(c.remote)}</h3>
-      <div class="cap">${esc(c.used)} von ${esc(c.total)} belegt</div>
-      <div class="bar"><div style="width:${Math.max(1, c.percent).toFixed(1)}%"></div></div>
-      <div class="row"><div class="v muted">${esc(c.free)} frei</div></div>
-    </div>`;
-  }).join("");
-
-  const wd = s.watchdog ? `<div class="card">
-    <h3>Wächter ${pill(s.watchdog)}</h3>
-    <div class="cap">prüft selbstständig, ob alles aktuell ist</div>
-    ${rows([["Letzte Prüfung", esc(s.watchdog.last || "–")], ["Nächste Prüfung", esc(s.watchdog.next || "–")]])}
-    ${s.watchdog.tail ? `<pre>${esc(s.watchdog.tail)}</pre>` : ""}
-    <div class="row-actions"><button class="btn small ghost" data-run="watchdog" data-id="">Jetzt prüfen</button></div>
-  </div>` : "";
-
-  return `
-    <div class="topbar">
-      <div><h2>Übersicht</h2><div class="sub">Backup und Synchronisierung auf einen Blick</div></div>
-      <div class="spacer"></div>
-      <button class="btn ghost" id="reload">Neu laden</button>
-    </div>
-    ${s.alarm ? `<div class="alarm"><strong>⚠ Aktueller Alarm</strong><pre>${esc(s.alarm)}</pre></div>` : ""}
-    <div class="grid">${restic}${sync}${clouds}${wd}</div>
-    ${(!s.restic && !s.sync) ? `<div class="empty">Noch keine Jobs konfiguriert – lege sie unter „Backup“ und „Sync“ an.</div>` : ""}
-  `;
-}
-
-/* ---------------- Backup ---------------- */
-function resticJobHtml(job, idx) {
-  const paths = (job.paths || []).map(p =>
-    `<div class="path"><span class="p">${esc(p)}</span><button data-rm-path="${idx}" data-path="${esc(p)}" title="Entfernen">×</button></div>`
-  ).join("") || '<div class="empty">Noch keine Ordner</div>';
-  return `<details class="job" data-idx="${idx}" ${idx === 0 ? "open" : ""}>
-    <summary>
-      <span class="chev">▸</span>
-      <div><div class="title">${esc(job.name || job.id || "Neuer Job")}</div>
-      <div class="where">${esc(job.repository || "kein Repository")} · ${(job.paths || []).length} Ordner</div></div>
-    </summary>
-    <div class="job-body">
-      <div class="form-grid">
-        <div class="field"><label>Name</label><input type="text" data-f="name" value="${esc(job.name)}"></div>
-        <div class="field"><label>Kennung</label><input type="text" data-f="id" value="${esc(job.id)}"></div>
-        <div class="field"><label>Repository</label><input type="text" data-f="repository" value="${esc(job.repository)}"></div>
-        <div class="field"><label>Passwortdatei</label><input type="text" data-f="password_file" value="${esc(job.password_file)}"></div>
-        <div class="field"><label>Cache-Verzeichnis</label><input type="text" data-f="cache_dir" value="${esc(job.cache_dir)}"></div>
-        <div class="field"><label>Ausschlussdatei</label><input type="text" data-f="exclude_file" value="${esc(job.exclude_file)}"></div>
-        <div class="field"><label>Zeitplan (systemd, z. B. 12h)</label><input type="text" data-f="schedule" value="${esc(job.schedule)}"></div>
-        <div class="field"><label>Start nach (z. B. 3min)</label><input type="text" data-f="startup" value="${esc(job.startup)}"></div>
-        <div class="field"><label>Timeout</label><input type="text" data-f="timeout" value="${esc(job.timeout)}"></div>
-        <div class="field"><label>Host</label><input type="text" data-f="host" value="${esc(job.host)}"></div>
-        <div class="field"><label>Aufbewahrung täglich</label><input type="number" data-f="keep_daily" value="${job.keep_daily ?? ""}"></div>
-        <div class="field"><label>wöchentlich</label><input type="number" data-f="keep_weekly" value="${job.keep_weekly ?? ""}"></div>
-        <div class="field"><label>monatlich</label><input type="number" data-f="keep_monthly" value="${job.keep_monthly ?? ""}"></div>
-        <div class="field"><label>jährlich</label><input type="number" data-f="keep_yearly" value="${job.keep_yearly ?? ""}"></div>
-        <div class="field"><label>Tags (Komma)</label><input type="text" data-f="tags" value="${esc((job.tags || []).join(", "))}"></div>
-        <div class="field"><label>Ausschlüsse (eine pro Zeile)</label><textarea data-f="exclude">${esc((job.exclude || []).join("\n"))}</textarea></div>
-      </div>
-      <div class="check"><input type="checkbox" data-f="enabled" ${job.enabled ? "checked" : ""}><span>aktiv</span></div>
-      <div class="check"><input type="checkbox" data-f="exclude_caches" ${job.exclude_caches ? "checked" : ""}><span>Cache-Verzeichnisse überspringen</span></div>
-      <div class="check"><input type="checkbox" data-f="one_file_system" ${job.one_file_system ? "checked" : ""}><span>nicht über Dateisystemgrenzen</span></div>
-      <label style="font-size:11.5px;color:var(--muted)">Ordner</label>
-      <div class="paths">${paths}</div>
-      <div class="row-actions">
-        <button class="btn small ghost" data-add-path="${idx}">Ordner hinzufügen …</button>
-        <button class="btn small" data-run="restic" data-id="${esc(job.id)}">Jetzt sichern</button>
-        <button class="btn small danger" data-del-restic="${idx}">Job löschen</button>
-      </div>
-    </div>
-  </details>`;
-}
-
-function pageBackup() {
-  const jobs = (cfg?.restic || []);
-  return `
-    <div class="topbar">
-      <div><h2>Backup</h2><div class="sub">verschlüsselte Snapshots mit restic, konfiguriert in <span class="mono">${esc(st ? st.config_path : "")}</span></div></div>
-      <div class="spacer"></div>
-      <button class="btn ghost" id="new-restic">Neuer Job</button>
-      <button class="btn" id="save-restic">Speichern</button>
-    </div>
-    <div id="jobs">${jobs.map(resticJobHtml).join("") || '<div class="empty">Keine Backup-Jobs</div>'}</div>
-    <p class="hint">Ordner und Einstellungen landen in der Konfigurationsdatei. Unter „Einstellungen“ werden daraus systemd-Timer erzeugt – oder alles per <span class="mono">backup-status apply</span>.</p>
-  `;
-}
-
-/* ---------------- Sync ---------------- */
-function syncJobHtml(job, idx) {
-  return `<details class="job" data-idx="${idx}" ${idx === 0 ? "open" : ""}>
-    <summary>
-      <span class="chev">▸</span>
-      <div><div class="title">${esc(job.name || job.id || "Neuer Sync")}</div>
-      <div class="where">${esc(job.source || "?")} → ${esc(job.target || "?")}</div></div>
-    </summary>
-    <div class="job-body">
-      <div class="form-grid">
-        <div class="field"><label>Name</label><input type="text" data-f="name" value="${esc(job.name)}"></div>
-        <div class="field"><label>Kennung</label><input type="text" data-f="id" value="${esc(job.id)}"></div>
-        <div class="field"><label>Quelle</label><input type="text" data-f="source" value="${esc(job.source)}"></div>
-        <div class="field"><label>Ziel (rclone, z. B. pcloud:media)</label><input type="text" data-f="target" value="${esc(job.target)}"></div>
-        <div class="field"><label>Modus</label>
-          <select data-f="mode">
-            <option value="sync" ${job.mode === "sync" ? "selected" : ""}>synchronisieren (Ziel angleichen)</option>
-            <option value="copy" ${job.mode === "copy" ? "selected" : ""}>kopieren (nichts löschen)</option>
-          </select>
-        </div>
-        <div class="field"><label>Sicherungsordner für Gelöschtes</label><input type="text" data-f="backup_dir" value="${esc(job.backup_dir)}"></div>
-        <div class="field"><label>Zeitplan</label><input type="text" data-f="schedule" value="${esc(job.schedule)}"></div>
-        <div class="field"><label>Start nach</label><input type="text" data-f="startup" value="${esc(job.startup)}"></div>
-        <div class="field"><label>Timeout</label><input type="text" data-f="timeout" value="${esc(job.timeout)}"></div>
-        <div class="field"><label>Transfers</label><input type="number" data-f="transfers" value="${job.transfers ?? ""}"></div>
-        <div class="field"><label>Checkers</label><input type="number" data-f="checkers" value="${job.checkers ?? ""}"></div>
-        <div class="field"><label>Ausschlüsse (eine pro Zeile)</label><textarea data-f="exclude">${esc((job.exclude || []).join("\n"))}</textarea></div>
-      </div>
-      <div class="check"><input type="checkbox" data-f="enabled" ${job.enabled ? "checked" : ""}><span>aktiv</span></div>
-      <div class="row-actions">
-        <button class="btn small" data-run="sync" data-id="${esc(job.id)}">Jetzt abgleichen</button>
-        <button class="btn small danger" data-del-sync="${idx}">Job löschen</button>
-      </div>
-    </div>
-  </details>`;
-}
-
-function pageSync() {
-  const jobs = (cfg?.sync || []);
-  return `
-    <div class="topbar">
-      <div><h2>Sync</h2><div class="sub">Ordner mit rclone abgleichen – Backup und Sync sind getrennt konfigurierbar</div></div>
-      <div class="spacer"></div>
-      <button class="btn ghost" id="new-sync">Neuer Job</button>
-      <button class="btn" id="save-sync">Speichern</button>
-    </div>
-    <div id="jobs">${jobs.map(syncJobHtml).join("") || '<div class="empty">Keine Sync-Jobs</div>'}</div>
-  `;
-}
-
-/* ---------------- Wiederherstellen ---------------- */
-let restoreState = { job: "", snapshot: "", dir: "", selected: "", snaps: [], files: [], parent: "" };
-
-function pageRestore() {
-  const jobs = cfg?.restic || [];
-  const rs = restoreState;
-  if (!rs.job && jobs.length) rs.job = jobs[0].id;
-  return `
-    <div class="topbar">
-      <div><h2>Wiederherstellen</h2><div class="sub">Snapshot wählen, Dateien ansehen und zurückholen</div></div>
-    </div>
-    <div class="card" style="margin-bottom:14px">
-      <div class="form-grid">
-        <div class="field"><label>Backup-Job</label>
-          <select id="r-job">${jobs.map(j => `<option value="${esc(j.id)}" ${j.id === rs.job ? "selected" : ""}>${esc(j.name)}</option>`).join("")}</select>
-        </div>
-        <div class="field"><label>Snapshot</label>
-          <select id="r-snap"><option value="">– Snapshot laden –</option>${rs.snaps.map(s => `<option value="${esc(s.id)}" ${s.id === rs.snapshot ? "selected" : ""}>${esc(s.label)}</option>`).join("")}</select>
-        </div>
-      </div>
-      <div class="row-actions">
-        <button class="btn ghost" id="r-load">Snapshots laden</button>
-        <button class="btn ghost" id="r-search-toggle">Datei suchen</button>
-      </div>
-      <div id="r-searchwrap" style="display:none;margin-top:12px">
-        <div class="field"><label>Suchbegriff im Snapshot</label>
-          <div style="display:flex;gap:8px"><input type="text" id="r-query" placeholder="z. B. Rechnung.pdf"><button class="btn" id="r-search">Suchen</button></div>
-        </div>
-      </div>
-    </div>
-    <div class="split">
-      <div class="card">
-        <h3>Dateien</h3>
-        <div class="cap" id="r-browse-cap">${rs.snapshot ? esc(rs.dir || "/") : "Noch kein Snapshot gewählt"}</div>
-        <div id="r-crumbs" class="crumbs"></div>
-        <div class="list" id="r-files"><div class="empty">–</div></div>
-      </div>
-      <div class="card">
-        <h3>Zurückholen</h3>
-        <div class="cap">Auswahl: <span id="r-selected" class="mono">gesamter Snapshot</span></div>
-        <div class="field"><label>Zielordner</label>
-          <div style="display:flex;gap:8px">
-            <input type="text" id="r-target" placeholder="~/wiederhergestellt">
-            <button class="btn ghost small" id="r-pick">Wählen …</button>
-          </div>
-        </div>
-        <div class="check"><input type="checkbox" id="r-dry"><span>nur anzeigen (Probelauf)</span></div>
-        <div class="row-actions">
-          <button class="btn" id="r-do">Wiederherstellen</button>
-          <button class="btn ghost" id="r-clear">Auswahl aufheben</button>
-          <button class="btn ghost" id="r-open" style="display:none">Ordner öffnen</button>
-        </div>
-        <div class="result" id="r-result"></div>
-        <p class="hint">Die vollständige Verzeichnisstruktur wird unter dem Zielordner angelegt. Ohne Auswahl wird der ganze Snapshot wiederhergestellt.</p>
-      </div>
-    </div>
-  `;
-}
-
-function snapshotLabel(s) {
-  let when = s.time || "";
-  const d = new Date(when);
-  if (!isNaN(d)) {
-    when = d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
-  }
-  const short = (s.short_id || (s.id || "").slice(0, 8));
-  return `${when} · ${short}`;
-}
-
-function renderFiles() {
-  const rs = restoreState;
-  const list = $("r-files");
-  if (!list) return;
-  $("r-browse-cap").textContent = rs.dir || "/";
-  const parts = rs.dir.split("/").filter(Boolean);
-  let crumbs = `<span data-crumb="">/</span>`;
-  let acc = "";
-  for (const p of parts) {
-    acc += "/" + p;
-    crumbs += ` <span data-crumb="${esc(acc)}">${esc(p)}</span> /`;
-  }
-  $("r-crumbs").innerHTML = rs.dir ? crumbs : "";
-  $("r-crumbs").querySelectorAll("[data-crumb]").forEach(el => {
-    el.onclick = () => { rs.dir = el.dataset.crumb; renderFiles(); };
-  });
-
-  if (!rs.snapshot) { list.innerHTML = '<div class="empty">–</div>'; return; }
-  if (!rs.files.length) { list.innerHTML = '<div class="empty">leer</div>'; return; }
-
-  let html = "";
-  if (rs.parent) html += `<div class="item parent" data-dir="${esc(rs.parent)}"><span class="nm">… übergeordnet</span></div>`;
-  html += rs.files.map(n => {
-    const isDir = n.type === "dir";
-    const size = isDir ? "" : (n.size != null ? fmtSize(n.size) : "");
-    return `<div class="item ${isDir ? "dir" : ""} ${rs.selected === n.path ? "sel" : ""}" data-${isDir ? "dir" : "file"}="${esc(n.path)}">
-      <span class="nm">${esc(n.name)}</span><span class="meta">${esc(size)}</span></div>`;
-  }).join("");
-  list.innerHTML = html;
-  list.querySelectorAll("[data-dir]").forEach(el => {
-    el.onclick = () => { rs.dir = el.dataset.dir; rs.selected = ""; updateSelected(); browse(); };
-  });
-  list.querySelectorAll("[data-file]").forEach(el => {
-    el.onclick = () => { rs.selected = el.dataset.file; updateSelected(); list.querySelectorAll(".item").forEach(i => i.classList.remove("sel")); el.classList.add("sel"); };
-  });
-}
-
-function updateSelected() {
-  const el = $("r-selected");
-  if (el) el.textContent = restoreState.selected || "gesamter Snapshot";
-}
-
-function fmtSize(n) {
+const fmtSize = (n) => {
+  if (n == null) return "";
+  if (typeof n === "string") return n;
   const u = ["B", "KiB", "MiB", "GiB", "TiB"]; let v = n, i = 0;
   while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
   return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${u[i]}`;
+};
+const fmtDate = (iso) => {
+  if (!iso) return "–";
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+};
+const fmtClock = (iso) => {
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+};
+
+async function loadCfg() { cfg = await inv("config_get"); }
+async function loadFast() { try { st = await inv("status_fast"); } catch (e) {} }
+async function loadFull(force) { try { st = await inv(force ? "refresh" : "status"); } catch (e) {} }
+
+function statusMeta() {
+  const el = $("meta");
+  if (!st) { el.innerHTML = ""; return; }
+  el.innerHTML = `<b>${esc(st.now || "")}</b><br>Konfiguration in Datei`;
 }
 
+/* ================= Rail (Timeline) ================= */
+function rail() {
+  const s = st || {};
+  const total = s.jobs_total || 0;
+  const ok = s.jobs_ok || 0;
+  const pct = total ? Math.round(ok / total * 100) : 100;
+  const protects = !s.alarm && !(s.jobs_failed > 0);
+
+  const today = new Date().toLocaleDateString("de-DE");
+  const items = (s.history || []).map(h => {
+    const bad = h.status === "failed";
+    const day = (h.when || "").split(" ")[0] || "";
+    const clock = day === today ? (h.when.split(" ")[1] || "") : day.replace(/\.\d{4}$/, "");
+    return `<div class="titem" data-jump="${bad ? "overview" : "history"}">
+      <div class="clock">${esc(clock)}</div>
+      <div class="dot ${bad ? "bad" : ""}"></div>
+      <div><div class="tl">${bad ? "Problem" : "OK"}</div>
+      <div class="tn">${esc(h.name)}</div></div>
+    </div>`;
+  }).join("");
+
+  $("rail").innerHTML = `
+    <div class="gauge">
+      <div class="ring" style="--p:${pct}%"><span>${pct}%</span></div>
+      <div><div class="lbl">geschützt</div><div class="val">${protects ? "Alles aktuell" : "prüfen"}</div></div>
+    </div>
+    <h4>Zeitleiste</h4>
+    ${items || '<div class="tn" style="padding:6px 0">Noch keine Läufe</div>'}
+  `;
+  $("rail").querySelectorAll("[data-jump]").forEach(el => el.onclick = () => goto(el.dataset.jump));
+}
+
+/* ================= Übersicht ================= */
+function jobRows() {
+  const s = st || {};
+  const rows = [];
+  for (const j of (s.restic || [])) {
+    const snap = j.snapshot;
+    const bad = j.failed;
+    rows.push({
+      kind: "backup",
+      dot: !j.enabled ? "off" : bad ? "bad" : j.active ? "" : "warn",
+      title: j.name,
+      sub: `${j.paths.length} Ordner · ${esc(j.repository)}${snap ? " · letzter Snapshot " + esc(snap.time) : ""}${snap ? " · " + esc(snap.size) : ""}`,
+      when: j.active ? "läuft" : (j.last || "–"),
+      prog: j.progress || "",
+      run: ["restic", j.id],
+      log: j.tail,
+    });
+  }
+  for (const j of (s.sync || [])) {
+    const bad = j.failed;
+    rows.push({
+      kind: "sync",
+      dot: !j.enabled ? "off" : bad ? "bad" : j.active ? "" : "warn",
+      title: j.name,
+      sub: `${esc(j.source)} → ${esc(j.target)} · ${j.mode === "copy" ? "kopieren" : "abgleichen"}`,
+      when: j.active ? "läuft" : (j.last || "–"),
+      prog: j.progress || "",
+      run: ["sync", j.id],
+      log: j.tail,
+    });
+  }
+  return rows;
+}
+
+function overviewRows() {
+  const s = st || {};
+  let rows = jobRows();
+  if (filter === "backup") rows = rows.filter(r => r.kind === "backup");
+  if (filter === "sync") rows = rows.filter(r => r.kind === "sync");
+  if (filter === "issues") rows = rows.filter(r => r.dot === "bad" || r.dot === "warn");
+  if (filter === "checks") {
+    const checks = (st.checks || []);
+    if (!checks.length) return `<div class="empty">Noch keine Prüfungen – starte sie im Backup-Bereich eines Jobs.</div>`;
+    return `<div class="rowlist">${checks.map(c => `
+      <div class="row">
+        <div class="dot ${c.status === "failed" ? "bad" : ""}"></div>
+        <div class="main"><div class="title">${esc(c.kind)} · ${esc(c.name)}</div>
+        <div class="sub">${esc(c.detail || "ohne Befund")}</div></div>
+        <div class="when">${esc(c.when || "–")}</div>
+        <div class="act"></div>
+      </div>`).join("")}</div>`;
+  }
+  if (!rows.length) return `<div class="empty">Keine Einträge${filter === "checks" ? " – Prüfungen startest du unter Backup" : ""}</div>`;
+  return `<div class="rowlist">${rows.map(r => `
+    <div class="row">
+      <div class="dot ${r.dot}"></div>
+      <div class="main">
+        <div class="title">${esc(r.title)}</div>
+        <div class="sub">${r.sub}</div>
+        ${r.prog ? `<div class="prog">${esc(r.prog)}</div>` : ""}
+      </div>
+      <div class="when">${esc(r.when)}</div>
+      <div class="act">
+        <button class="btn quiet sm" data-run="${r.run[0]}" data-id="${esc(r.run[1])}">Jetzt</button>
+      </div>
+    </div>`).join("")}</div>`;
+}
+
+function pageOverview() {
+  const s = st || {};
+  if (!s.jobs_total && !st) return `<div class="empty">lädt …</div>`;
+  const protects = !s.alarm && !(s.jobs_failed > 0);
+  const latest = s.last_success || "";
+  const alarm = s.alarm
+    ? `<div class="alarmbar"><div><b>Aktueller Alarm</b>${esc(s.alarm)}</div></div>` : "";
+
+  const tabs = [
+    ["all", "Alle"], ["backup", "Backups"], ["sync", "Sync"],
+    ["checks", "Prüfungen"], ["issues", "Probleme"]
+  ].map(([id, l]) => `<button data-filter="${id}" class="${filter === id ? "on" : ""}">${l}</button>`).join("");
+
+  return `
+    ${alarm}
+    <div class="hero">
+      <h2>${protects ? "Alles ist geschützt" : "Es gibt etwas zu prüfen"}</h2>
+      <p>${latest ? `Das letzte Backup wurde <b>${esc(latest)}</b> abgeschlossen.` : "Noch kein Backup abgeschlossen."}</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">${s.jobs_total || 0}</div><div class="k">Jobs</div></div>
+      <div class="stat"><div class="n">${(s.restic || []).reduce((a, j) => a + (j.snapshots || 0), 0)}</div><div class="k">Snapshots</div></div>
+      <div class="stat"><div class="n ok">${s.jobs_ok || 0}</div><div class="k">In Ordnung</div></div>
+      <div class="stat"><div class="n ${s.jobs_failed ? "bad" : ""}">${s.jobs_failed || 0}</div><div class="k">Probleme</div></div>
+    </div>
+    <div class="tabs">${tabs}</div>
+    ${overviewRows()}
+    ${(s.clouds || []).filter(c => c.ok).map(c => `
+      <div style="display:flex;align-items:center;gap:14px;padding:16px 4px;border-bottom:1px solid var(--line)">
+        <div style="flex:1;font-size:12.5px;color:var(--muted)">Speicher <span class="mono">${esc(c.remote)}</span></div>
+        <div style="width:220px;height:5px;background:#1a2229;border-radius:99px;overflow:hidden">
+          <div style="width:${Math.max(1, c.percent).toFixed(1)}%;height:100%;background:var(--teal-light)"></div>
+        </div>
+        <div style="font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums">${esc(c.used)} / ${esc(c.total)}</div>
+      </div>`).join("")}
+  `;
+}
+
+/* ================= Backup ================= */
+let openBackup = null;
+
+function backupJob(job, idx) {
+  const open = openBackup === idx;
+  const paths = (job.paths || []).map(p => `
+    <div class="pathrow"><span class="p">${esc(p)}</span>
+    <button data-rm-path="${idx}" data-path="${esc(p)}" title="Entfernen">×</button></div>`).join("")
+    || '<div class="empty" style="padding:14px 0">Noch keine Ordner</div>';
+  return `
+  <div class="jobhead ${open ? "open" : ""}" data-open="${idx}">
+    <div class="dot ${job.enabled ? "" : "off"}"></div>
+    <div class="grow">
+      <div class="name">${esc(job.name || job.id)}</div>
+      <div class="desc">${esc(job.repository)} · ${(job.paths || []).length} Ordner · alle ${esc(job.schedule)}</div>
+    </div>
+    <span class="chev">▸</span>
+  </div>
+  ${open ? `<div class="jobbody">
+    <div class="fgrid">
+      <div class="field"><label>Name</label><input type="text" data-f="name" value="${esc(job.name)}"></div>
+      <div class="field"><label>Kennung</label><input type="text" data-f="id" value="${esc(job.id)}"></div>
+      <div class="field"><label>Repository</label><input type="text" data-f="repository" value="${esc(job.repository)}"></div>
+      <div class="field"><label>Passwortdatei</label><input type="text" data-f="password_file" value="${esc(job.password_file)}"></div>
+      <div class="field"><label>Cache-Verzeichnis</label><input type="text" data-f="cache_dir" value="${esc(job.cache_dir)}"></div>
+      <div class="field"><label>Ausschlussdatei</label><input type="text" data-f="exclude_file" value="${esc(job.exclude_file)}"></div>
+      <div class="field"><label>Zeitplan</label><input type="text" data-f="schedule" value="${esc(job.schedule)}" placeholder="12h"></div>
+      <div class="field"><label>Start nach</label><input type="text" data-f="startup" value="${esc(job.startup)}" placeholder="3min"></div>
+      <div class="field"><label>Timeout</label><input type="text" data-f="timeout" value="${esc(job.timeout)}" placeholder="12h"></div>
+      <div class="field"><label>Host</label><input type="text" data-f="host" value="${esc(job.host)}"></div>
+      <div class="field"><label>Täglich behalten</label><input type="number" data-f="keep_daily" value="${job.keep_daily ?? ""}"></div>
+      <div class="field"><label>Wöchentlich</label><input type="number" data-f="keep_weekly" value="${job.keep_weekly ?? ""}"></div>
+      <div class="field"><label>Monatlich</label><input type="number" data-f="keep_monthly" value="${job.keep_monthly ?? ""}"></div>
+      <div class="field"><label>Jährlich</label><input type="number" data-f="keep_yearly" value="${job.keep_yearly ?? ""}"></div>
+      <div class="field"><label>Tags (Komma)</label><input type="text" data-f="tags" value="${esc((job.tags || []).join(", "))}"></div>
+      <div class="field"><label>Ausschlüsse (pro Zeile)</label><textarea data-f="exclude">${esc((job.exclude || []).join("\n"))}</textarea></div>
+    </div>
+    <div>
+      <label class="check"><input type="checkbox" data-f="enabled" ${job.enabled ? "checked" : ""}><span>aktiv</span></label>
+      <label class="check"><input type="checkbox" data-f="exclude_caches" ${job.exclude_caches ? "checked" : ""}><span>Cache-Verzeichnisse überspringen</span></label>
+      <label class="check"><input type="checkbox" data-f="one_file_system" ${job.one_file_system ? "checked" : ""}><span>nicht über Dateisystemgrenzen</span></label>
+    </div>
+    <div class="section-title" style="margin-top:16px">Ordner</div>
+    ${paths}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px">
+      <button class="btn ghost sm" data-add-path="${idx}">Ordner hinzufügen</button>
+      <button class="btn sm" data-run="restic" data-id="${esc(job.id)}">Jetzt sichern</button>
+      <button class="btn ghost sm" data-act="check" data-id="${esc(job.id)}">Prüfen</button>
+      <button class="btn ghost sm" data-act="prune" data-id="${esc(job.id)}">Aufräumen</button>
+      <button class="btn ghost sm" data-act="init" data-id="${esc(job.id)}">Repo anlegen</button>
+      <button class="btn danger sm" data-del="${idx}" style="margin-left:auto">Job löschen</button>
+    </div>
+    <div class="result" id="act-${idx}"></div>
+  </div>` : ""}`;
+}
+
+function pageBackup() {
+  const jobs = cfg?.restic || [];
+  return `
+    <div class="hero" style="display:flex;align-items:flex-end;gap:20px">
+      <div style="flex:1">
+        <h2>Backup</h2>
+        <p>Verschlüsselte Snapshots mit restic. Alles landet in <span class="mono">${esc(st ? st.config_path : "")}</span>.</p>
+      </div>
+      <button class="btn ghost" id="new-restic">Neuer Job</button>
+      <button class="btn" id="save">Speichern</button>
+    </div>
+    <div>${jobs.map(backupJob).join("") || '<div class="empty">Keine Backup-Jobs</div>'}</div>
+    <p class="hint">Ordner lassen sich direkt hier ergänzen. Ohne Oberfläche: <code>backup-status add-path dokumente /pfad</code>.</p>
+  `;
+}
+
+/* ================= Sync ================= */
+let openSync = null;
+
+function syncJob(job, idx) {
+  const open = openSync === idx;
+  return `
+  <div class="jobhead ${open ? "open" : ""}" data-open-sync="${idx}">
+    <div class="dot ${job.enabled ? "" : "off"}"></div>
+    <div class="grow">
+      <div class="name">${esc(job.name || job.id)}</div>
+      <div class="desc">${esc(job.source)} → ${esc(job.target)} · ${job.mode === "copy" ? "kopieren" : "abgleichen"} · alle ${esc(job.schedule)}</div>
+    </div>
+    <span class="chev">▸</span>
+  </div>
+  ${open ? `<div class="jobbody">
+    <div class="fgrid">
+      <div class="field"><label>Name</label><input type="text" data-f="name" value="${esc(job.name)}"></div>
+      <div class="field"><label>Kennung</label><input type="text" data-f="id" value="${esc(job.id)}"></div>
+      <div class="field"><label>Quelle</label><input type="text" data-f="source" value="${esc(job.source)}"></div>
+      <div class="field"><label>Ziel</label><input type="text" data-f="target" value="${esc(job.target)}"></div>
+      <div class="field"><label>Modus</label><select data-f="mode">
+        <option value="sync" ${job.mode === "sync" ? "selected" : ""}>synchronisieren</option>
+        <option value="copy" ${job.mode === "copy" ? "selected" : ""}>kopieren (nichts löschen)</option>
+      </select></div>
+      <div class="field"><label>Gelöschtes nach</label><input type="text" data-f="backup_dir" value="${esc(job.backup_dir)}"></div>
+      <div class="field"><label>Zeitplan</label><input type="text" data-f="schedule" value="${esc(job.schedule)}"></div>
+      <div class="field"><label>Start nach</label><input type="text" data-f="startup" value="${esc(job.startup)}"></div>
+      <div class="field"><label>Timeout</label><input type="text" data-f="timeout" value="${esc(job.timeout)}"></div>
+      <div class="field"><label>Transfers</label><input type="number" data-f="transfers" value="${job.transfers ?? ""}"></div>
+      <div class="field"><label>Checkers</label><input type="number" data-f="checkers" value="${job.checkers ?? ""}"></div>
+      <div class="field"><label>Ausschlüsse (pro Zeile)</label><textarea data-f="exclude">${esc((job.exclude || []).join("\n"))}</textarea></div>
+    </div>
+    <label class="check"><input type="checkbox" data-f="enabled" ${job.enabled ? "checked" : ""}><span>aktiv</span></label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn sm" data-run="sync" data-id="${esc(job.id)}">Jetzt abgleichen</button>
+      <button class="btn danger sm" data-del-sync="${idx}" style="margin-left:auto">Job löschen</button>
+    </div>
+  </div>` : ""}`;
+}
+
+function pageSync() {
+  const jobs = cfg?.sync || [];
+  return `
+    <div class="hero" style="display:flex;align-items:flex-end;gap:20px">
+      <div style="flex:1">
+        <h2>Sync</h2>
+        <p>Ordner mit rclone abgleichen – getrennt vom verschlüsselten Backup.</p>
+      </div>
+      <button class="btn ghost" id="new-sync">Neuer Job</button>
+      <button class="btn" id="save">Speichern</button>
+    </div>
+    <div>${jobs.map(syncJob).join("") || '<div class="empty">Keine Sync-Jobs</div>'}</div>
+  `;
+}
+
+/* ================= Wiederherstellen ================= */
+const rs = { job: "", snapshot: "", dir: "", selected: "", snaps: [], files: [], parent: "" };
+
+function pageRestore() {
+  const jobs = cfg?.restic || [];
+  if (!rs.job && jobs.length) rs.job = jobs[0].id;
+  const snaps = rs.snaps.map(s => `
+    <div class="snap ${s.id === rs.snapshot ? "sel" : ""}" data-snap="${esc(s.id)}">
+      <div class="t">${esc(fmtDate(s.time))}</div>
+      <div class="s">${esc(s.short_id || "")}</div>
+    </div>`).join("") || '<div class="empty">Snapshots laden</div>';
+
+  return `
+    <div class="hero" style="display:flex;align-items:flex-end;gap:20px">
+      <div style="flex:1"><h2>Wiederherstellen</h2>
+      <p>Snapshot wählen, Dateien ansehen und zurückholen.</p></div>
+      <select id="r-job" style="width:auto;min-width:200px">${jobs.map(j => `<option value="${esc(j.id)}" ${j.id === rs.job ? "selected" : ""}>${esc(j.name)}</option>`).join("")}</select>
+      <button class="btn ghost" id="r-load">Snapshots laden</button>
+    </div>
+    <div class="split">
+      <div class="pane">
+        <h3>Snapshots</h3>
+        <div id="r-snaps">${snaps}</div>
+      </div>
+      <div class="pane">
+        <h3>Dateien</h3>
+        <div class="crumbs" id="r-crumbs"></div>
+        <div id="r-files">${filesHtml()}</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="section-title">Zurückholen</div>
+      <div class="fgrid" style="align-items:end">
+        <div class="field"><label>Auswahl</label><input type="text" id="r-selected" value="${esc(rs.selected || "gesamter Snapshot")}" readonly></div>
+        <div class="field"><label>Zielordner</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="r-target" placeholder="~/wiederhergestellt">
+            <button class="btn ghost sm" id="r-pick">Wählen</button>
+          </div>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="r-dry"><span>nur anzeigen (Probelauf)</span></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <button class="btn" id="r-do">Wiederherstellen</button>
+        <button class="btn ghost" id="r-clear">Auswahl aufheben</button>
+        <button class="btn ghost" id="r-open" style="display:none">Ordner öffnen</button>
+      </div>
+      <div class="result" id="r-result"></div>
+    </div>
+  `;
+}
+
+function renderCrumbs() {
+  const el = $("r-crumbs"); if (!el) return;
+  if (!rs.dir) { el.innerHTML = ""; return; }
+  const parts = rs.dir.split("/").filter(Boolean);
+  let acc = "", html = `<span data-crumb="">/</span>`;
+  for (const p of parts) { acc += "/" + p; html += ` <span data-crumb="${esc(acc)}">${esc(p)}</span> /`; }
+  el.innerHTML = html;
+  el.querySelectorAll("[data-crumb]").forEach(s => s.onclick = () => { rs.dir = s.dataset.crumb; browse(); });
+}
+
+function filesHtml() {
+  if (!rs.snapshot) return '<div class="empty">Noch kein Snapshot gewählt</div>';
+  if (!rs.files.length) return '<div class="empty">leer</div>';
+  let html = "";
+  if (rs.parent) html += `<div class="fitem" data-dir="${esc(rs.parent)}"><span class="ico">↰</span><span class="nm">… übergeordnet</span></div>`;
+  html += rs.files.map(n => {
+    const isDir = n.type === "dir";
+    return `<div class="fitem ${rs.selected === n.path ? "sel" : ""}" data-${isDir ? "dir" : "file"}="${esc(n.path)}">
+      <span class="ico">${isDir ? "▸" : "·"}</span>
+      <span class="nm">${esc(n.name)}</span>
+      <span class="sz">${isDir ? "" : fmtSize(n.size)}</span></div>`;
+  }).join("");
+  return html;
+}
+
+function renderFiles() {
+  const el = $("r-files"); if (!el) return;
+  el.innerHTML = filesHtml();
+  el.querySelectorAll("[data-dir]").forEach(x => x.onclick = () => { rs.dir = x.dataset.dir; rs.selected = ""; syncSelected(); browse(); });
+  el.querySelectorAll("[data-file]").forEach(x => x.onclick = () => {
+    rs.selected = x.dataset.file; syncSelected();
+    el.querySelectorAll(".fitem").forEach(i => i.classList.remove("sel"));
+    x.classList.add("sel");
+  });
+}
+
+function syncSelected() { const el = $("r-selected"); if (el) el.value = rs.selected || "gesamter Snapshot"; }
+
 async function browse() {
-  const rs = restoreState;
   if (!rs.snapshot) return;
-  const dir = rs.dir;
-  rs.parent = dir ? dir.split("/").slice(0, -1).join("/") || "" : "";
+  rs.parent = rs.dir ? (rs.dir.split("/").slice(0, -1).join("/") || "") : "";
+  renderCrumbs();
   try {
-    const nodes = await inv("snapshot_files", { jobId: rs.job, snapshot: rs.snapshot, dir });
+    const nodes = await inv("snapshot_files", { jobId: rs.job, snapshot: rs.snapshot, dir: rs.dir });
     nodes.sort((a, b) => (a.type === b.type ? a.name.localeCompare(b.name) : a.type === "dir" ? -1 : 1));
-    rs.files = nodes.filter(n => n.path !== dir);
+    rs.files = nodes.filter(n => n.path !== rs.dir);
     renderFiles();
   } catch (e) { toast(String(e), true); }
 }
 
-/* ---------------- Einstellungen ---------------- */
+/* ================= Verlauf (Datei-Historie) ================= */
+const hs = { job: "", query: "", results: [], chosen: {}, picked: {} };
+
+function histGroups() {
+  const groups = new Map();
+  for (const r of hs.results) {
+    if (!groups.has(r.path)) groups.set(r.path, []);
+    groups.get(r.path).push(r);
+  }
+  return [...groups.entries()].map(([path, versions]) => {
+    versions.sort((a, b) => (new Date(b.mtime) - new Date(a.mtime)));
+    return { path, name: versions[0].name, type: versions[0].type, size: versions[0].size, versions };
+  });
+}
+
+function pageHistory() {
+  const jobs = cfg?.restic || [];
+  if (!hs.job && jobs.length) hs.job = jobs[0].id;
+  const groups = histGroups();
+  const picked = Object.keys(hs.picked).filter(k => hs.picked[k]);
+
+  const list = groups.map(g => {
+    const opts = g.versions.map(v =>
+      `<option value="${esc(v.snapshot)}" ${hs.chosen[g.path] === v.snapshot ? "selected" : ""}>${esc(fmtDate(v.mtime))} · ${esc(v.short_id)}</option>`).join("");
+    return `<div class="vitem">
+      <input type="checkbox" class="cb" data-pick="${esc(g.path)}" ${hs.picked[g.path] ? "checked" : ""}>
+      <div class="nm">${esc(g.name)}<div class="p">${esc(g.path)}</div></div>
+      <select data-chose="${esc(g.path)}">${opts}</select>
+    </div>`;
+  }).join("");
+
+  return `
+    <div class="hero">
+      <h2>Verlauf</h2>
+      <p>Dateien über alle Snapshots durchsuchen und passende Versionen zurückholen.</p>
+    </div>
+    <div class="fgrid" style="align-items:end;margin-top:22px">
+      <div class="field"><label>Backup-Job</label>
+        <select id="h-job">${jobs.map(j => `<option value="${esc(j.id)}" ${j.id === hs.job ? "selected" : ""}>${esc(j.name)}</option>`).join("")}</select></div>
+      <div class="field"><label>Datei- oder Ordnername</label>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="h-query" value="${esc(hs.query)}" placeholder="z. B. Rechnung* oder *.pdf">
+          <button class="btn" id="h-search">Suchen</button>
+        </div>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:0">Platzhalter: <code>*</code> beliebig viele Zeichen, <code>?</code> genau eines. Die Suche läuft über alle Snapshots.</p>
+    <div class="section-title" style="margin-top:22px">${groups.length ? groups.length + " Treffer" : "Ergebnisse"}</div>
+    ${groups.length ? `<div class="versions">${list}</div>` : '<div class="empty">Noch keine Suche</div>'}
+    <div class="panel">
+      <div class="section-title">Ausgewählte wiederherstellen (${picked.length})</div>
+      <div class="fgrid" style="align-items:end">
+        <div class="field"><label>Zielordner</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="h-target" placeholder="~/wiederhergestellt">
+            <button class="btn ghost sm" id="h-pick">Wählen</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="h-restore">Auswahl wiederherstellen</button>
+        <button class="btn ghost" id="h-open" style="display:none">Ordner öffnen</button>
+      </div>
+      <div class="result" id="h-result"></div>
+    </div>
+  `;
+}
+
+/* ================= Einstellungen ================= */
 function pageSettings() {
   const s = cfg?.settings || {};
   return `
-    <div class="topbar">
-      <div><h2>Einstellungen</h2><div class="sub">Alles wird in einer TOML-Datei gespeichert und funktioniert auch ohne Oberfläche</div></div>
-      <div class="spacer"></div>
-      <button class="btn" id="save-settings">Speichern</button>
+    <div class="hero" style="display:flex;align-items:flex-end;gap:20px">
+      <div style="flex:1"><h2>Einstellungen</h2>
+      <p>Konfiguration, Wächter und systemd.</p></div>
+      <button class="btn" id="save">Speichern</button>
     </div>
-    <div class="card" style="margin-bottom:14px">
-      <h3>Dateien</h3>
-      <div class="cap">Konfiguration <span class="mono">${esc(st ? st.config_path : "")}</span></div>
-      <div class="row-actions">
-        <button class="btn ghost small" id="open-cfg">Ordner öffnen</button>
-        <button class="btn ghost small" id="copy-cfg">Pfad kopieren</button>
+
+    <div class="panel">
+      <div class="section-title">Konfigurationsdatei</div>
+      <div class="mono" style="color:var(--text);word-break:break-all">${esc(st ? st.config_path : "")}</div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn ghost sm" id="open-cfg">Ordner öffnen</button>
+        <button class="btn ghost sm" id="copy-cfg">Pfad kopieren</button>
       </div>
-      <p class="hint">Alle Jobs, Ordner und Zeitpläne stehen in dieser Datei. Ein Editor genügt, um auch ohne Fenster zu arbeiten (z. B. <span class="mono">backup-status run restic dokumente</span>).</p>
+      <p class="hint">Alle Jobs, Ordner und Zeitpläne stehen in dieser Datei. Ein Editor genügt, um auch ohne Fenster zu arbeiten.</p>
     </div>
-    <div class="card" style="margin-bottom:14px">
-      <h3>Wächter</h3>
-      <div class="cap">meldet, wenn Backups zu alt sind oder fehlschlagen</div>
-      <div class="form-grid">
+
+    <div class="panel">
+      <div class="section-title">Wächter</div>
+      <div class="fgrid">
         <div class="field"><label>Maximales Alter Backup (h)</label><input type="number" data-sf="max_restic_h" value="${s.max_restic_h ?? 48}"></div>
         <div class="field"><label>Maximales Alter Sync (h)</label><input type="number" data-sf="max_sync_h" value="${s.max_sync_h ?? 18}"></div>
         <div class="field"><label>Prüfintervall</label><input type="text" data-sf="watchdog_schedule" value="${esc(s.watchdog_schedule || "1h")}"></div>
         <div class="field"><label>Start nach</label><input type="text" data-sf="watchdog_startup" value="${esc(s.watchdog_startup || "10min")}"></div>
-        <div class="field"><label>Zustandsordner</label><input type="text" data-sf="state_dir" value="${esc(s.state_dir || "")}"></div>
+        <div class="field"><label>Zustandsordner</label><input type="text" data-sf="state_dir" value="${esc(s.state_dir || "")}" placeholder="Standard"></div>
       </div>
-      <div class="check"><input type="checkbox" data-sf="watchdog_enabled" ${s.watchdog_enabled ? "checked" : ""}><span>Wächter aktiv</span></div>
+      <label class="check"><input type="checkbox" data-sf="watchdog_enabled" ${s.watchdog_enabled ? "checked" : ""}><span>Wächter aktiv</span></label>
     </div>
-    <div class="card">
-      <h3>systemd</h3>
-      <div class="cap">aus der Konfiguration werden Timer für alle aktiven Jobs erzeugt</div>
-      <div class="check"><input type="checkbox" data-sf="disable_legacy" ${s.disable_legacy ? "checked" : ""}><span>alte Units (restic-backup, media-sync, backup-watchdog) beim Anwenden abschalten</span></div>
-      <div class="row-actions">
+
+    <div class="panel">
+      <div class="section-title">systemd</div>
+      <p class="hint" style="margin:0 0 14px">Aus der Konfiguration werden Timer für alle aktiven Jobs erzeugt.</p>
+      <label class="check"><input type="checkbox" data-sf="disable_legacy" ${s.disable_legacy ? "checked" : ""}><span>alte Units (restic-backup, media-sync, backup-watchdog) mit übernehmen bzw. abschalten</span></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="apply-units">Timer schreiben &amp; aktivieren</button>
         <button class="btn ghost" id="disable-legacy">Alte Units abschalten</button>
-        <button class="btn danger" id="remove-units">Alle Backup-Units entfernen</button>
+        <button class="btn danger" id="remove-units">Alle entfernen</button>
       </div>
       <div class="result" id="s-result"></div>
     </div>
   `;
 }
 
-/* ---------------- Rendern ---------------- */
+/* ================= Rendern ================= */
 function render() {
-  statusHead();
-  const view = $("view");
-  if (page === "overview") view.innerHTML = pageOverview();
-  else if (page === "backup") view.innerHTML = pageBackup();
-  else if (page === "sync") view.innerHTML = pageSync();
-  else if (page === "restore") view.innerHTML = pageRestore();
-  else view.innerHTML = pageSettings();
+  statusMeta();
+  rail();
+  const v = $("view");
+  if (page === "overview") v.innerHTML = pageOverview();
+  else if (page === "backup") v.innerHTML = pageBackup();
+  else if (page === "sync") v.innerHTML = pageSync();
+  else if (page === "restore") v.innerHTML = pageRestore();
+  else if (page === "history") v.innerHTML = pageHistory();
+  else v.innerHTML = pageSettings();
   wire();
 }
 
-/* ---------------- Formulare lesen ---------------- */
 function readForm(container, base) {
   const out = JSON.parse(JSON.stringify(base || {}));
   container.querySelectorAll("[data-f]").forEach(el => {
     const f = el.dataset.f;
     if (el.type === "checkbox") out[f] = el.checked;
     else if (el.type === "number") out[f] = el.value === "" ? null : Number(el.value);
-    else if (f === "exclude" || f === "tags") out[f] = el.value.split(f === "tags" ? "," : "\n").map(s => s.trim()).filter(Boolean);
+    else if (f === "exclude") out[f] = el.value.split("\n").map(x => x.trim()).filter(Boolean);
+    else if (f === "tags") out[f] = el.value.split(",").map(x => x.trim()).filter(Boolean);
     else out[f] = el.value;
   });
   return out;
 }
 
 function collectRestic() {
-  const list = [];
-  document.querySelectorAll("#jobs details.job").forEach(d => {
-    const idx = Number(d.dataset.idx);
-    list.push(readForm(d, cfg.restic[idx]));
+  const list = [...cfg.restic];
+  document.querySelectorAll(".jobbody").forEach(() => {});
+  document.querySelectorAll("[data-f]").forEach(() => {});
+  // only currently open job has inputs; merge them back
+  document.querySelectorAll(".jobbody").forEach(body => {
+    const head = body.previousElementSibling;
+    if (!head || head.dataset.open == null) return;
+    const idx = Number(head.dataset.open);
+    if (Number.isNaN(idx) || !list[idx]) return;
+    list[idx] = readForm(body, list[idx]);
   });
   cfg.restic = list;
 }
 
 function collectSync() {
-  const list = [];
-  document.querySelectorAll("#jobs details.job").forEach(d => {
-    const idx = Number(d.dataset.idx);
-    list.push(readForm(d, cfg.sync[idx]));
+  const list = [...cfg.sync];
+  document.querySelectorAll(".jobbody").forEach(body => {
+    const head = body.previousElementSibling;
+    if (!head || head.dataset.openSync == null) return;
+    const idx = Number(head.dataset.openSync);
+    if (Number.isNaN(idx) || !list[idx]) return;
+    list[idx] = readForm(body, list[idx]);
   });
   cfg.sync = list;
 }
@@ -706,31 +913,6 @@ function readSettings() {
   cfg.settings = out;
 }
 
-/* ---------------- Aktionen ---------------- */
-function newRestic() {
-  if (page === "backup") collectRestic();
-  cfg.restic.push({
-    id: "job" + (cfg.restic.length + 1), name: "Neuer Job", enabled: true,
-    repository: "rclone:pcloud:backups/restic", password_file: "", cache_dir: "",
-    paths: [], exclude_file: "", exclude: [], keep_daily: 7, keep_weekly: 4,
-    keep_monthly: 12, keep_yearly: 2, schedule: "12h", startup: "3min",
-    timeout: "12h", tags: ["scheduled"], host: "", one_file_system: true,
-    exclude_caches: true, unit: "", timer: ""
-  });
-  render();
-}
-
-function newSync() {
-  if (page === "sync") collectSync();
-  cfg.sync.push({
-    id: "sync" + (cfg.sync.length + 1), name: "Neuer Sync", enabled: true,
-    source: "", target: "pcloud:", mode: "sync", schedule: "6h", startup: "2min",
-    timeout: "24h", backup_dir: ".deleted/{timestamp}", exclude: [".deleted/**"],
-    extra_flags: [], transfers: 4, checkers: 8, unit: "", timer: ""
-  });
-  render();
-}
-
 async function saveCfg(msg) {
   try {
     if (page === "backup") collectRestic();
@@ -738,7 +920,7 @@ async function saveCfg(msg) {
     if (page === "settings") readSettings();
     cfg = await inv("config_save", { cfg });
     await loadCfg();
-    toast(msg || "Konfiguration gespeichert");
+    toast(msg || "Gespeichert");
     render();
   } catch (e) { toast(String(e), true); }
 }
@@ -746,161 +928,226 @@ async function saveCfg(msg) {
 async function doRun(kind, id) {
   try {
     await inv("run_job", { kind, id });
-    toast("gestartet – Ergebnis erscheint nach dem nächsten Laden");
+    toast("gestartet");
     setTimeout(async () => { await loadFast(); render(); await loadFull(false); render(); }, 1500);
   } catch (e) { toast(String(e), true); }
 }
 
-function wire() {
-  document.querySelectorAll("[data-run]").forEach(b => {
-    b.onclick = () => doRun(b.dataset.run, b.dataset.id);
-  });
-  const reload = $("reload");
-  if (reload) reload.onclick = async () => { reload.disabled = true; await loadFull(true); render(); };
-
-  const nr = $("new-restic"); if (nr) nr.onclick = newRestic;
-  const ns = $("new-sync"); if (ns) ns.onclick = newSync;
-  const sr = $("save-restic"); if (sr) sr.onclick = () => saveCfg("Backup-Jobs gespeichert");
-  const ss = $("save-sync"); if (ss) ss.onclick = () => saveCfg("Sync-Jobs gespeichert");
-  const stg = $("save-settings"); if (stg) stg.onclick = () => saveCfg("Einstellungen gespeichert");
-
-  document.querySelectorAll("[data-del-restic]").forEach(b => {
-    b.onclick = () => { collectRestic(); cfg.restic.splice(Number(b.dataset.delRestic), 1); render(); };
-  });
-  document.querySelectorAll("[data-del-sync]").forEach(b => {
-    b.onclick = () => { collectSync(); cfg.sync.splice(Number(b.dataset.delSync), 1); render(); };
-  });
-
-  document.querySelectorAll("[data-add-path]").forEach(b => {
-    b.onclick = async () => {
-      const idx = Number(b.dataset.addPath);
-      const dir = await inv("pick_folder");
-      if (!dir) return;
-      collectRestic();
-      const job = cfg.restic[idx];
-      if (!job.paths.includes(dir)) job.paths.push(dir);
-      try {
-        cfg = await inv("add_paths", { jobId: job.id, paths: [dir] });
-        await loadCfg();
-        toast("Ordner hinzugefügt und gespeichert");
-        render();
-        document.querySelectorAll("#jobs details.job").forEach(d => { if (Number(d.dataset.idx) === idx) d.open = true; });
-      } catch (e) { toast(String(e), true); }
-    };
-  });
-
-  document.querySelectorAll("[data-rm-path]").forEach(b => {
-    b.onclick = async () => {
-      const idx = Number(b.dataset.rmPath);
-      collectRestic();
-      const job = cfg.restic[idx];
-      job.paths = job.paths.filter(p => p !== b.dataset.path);
-      try {
-        cfg = await inv("config_save", { cfg });
-        await loadCfg();
-        toast("Ordner entfernt");
-        render();
-        document.querySelectorAll("#jobs details.job").forEach(d => { if (Number(d.dataset.idx) === idx) d.open = true; });
-      } catch (e) { toast(String(e), true); }
-    };
-  });
-
-  // Restore
-  const rl = $("r-load");
-  if (rl) {
-    $("r-job").onchange = (e) => {
-      restoreState = { job: e.target.value, snapshot: "", dir: "", selected: "", snaps: [], files: [], parent: "" };
-      render();
-    };
-    rl.onclick = async () => {
-      rl.disabled = true;
-      try {
-        const snaps = await inv("snapshots", { jobId: restoreState.job, limit: null });
-        restoreState.snaps = snaps.map(s => ({ id: s.id, label: snapshotLabel(s) }));
-        toast(`${snaps.length} Snapshots geladen`);
-        render();
-      } catch (e) { toast(String(e), true); rl.disabled = false; }
-    };
-    $("r-snap").onchange = (e) => {
-      restoreState.snapshot = e.target.value;
-      const job = cfg.restic.find(j => j.id === restoreState.job);
-      restoreState.dir = job && job.paths[0] ? job.paths[0] : "";
-      restoreState.files = [];
-      browse();
-    };
-    const st = $("r-search-toggle");
-    st.onclick = () => {
-      const w = $("r-searchwrap");
-      w.style.display = w.style.display === "none" ? "block" : "none";
-    };
-    $("r-search").onclick = async () => {
-      const q = $("r-query").value.trim();
-      if (!q || !restoreState.snapshot) { toast("Snapshot wählen und Begriff eingeben", true); return; }
-      try {
-        const res = await inv("search_files", { jobId: restoreState.job, snapshot: restoreState.snapshot, pattern: q });
-        const matches = [];
-        for (const r of res) for (const m of (r.matches || [])) matches.push({ ...m, snapshot: r.snapshot });
-        restoreState.dir = "";
-        restoreState.files = matches.map(m => ({ name: m.path, path: m.path, type: m.type, size: m.size }));
-        restoreState.parent = "";
-        renderFiles();
-      } catch (e) { toast(String(e), true); }
-    };
-    $("r-pick").onclick = async () => {
-      const dir = await inv("pick_folder");
-      if (dir) $("r-target").value = dir;
-    };
-    $("r-clear").onclick = () => { restoreState.selected = ""; updateSelected(); renderFiles(); };
-    $("r-do").onclick = async () => {
-      const target = $("r-target").value.trim();
-      if (!target) { toast("Bitte Zielordner wählen", true); return; }
-      if (!restoreState.snapshot) { toast("Bitte Snapshot wählen", true); return; }
-      const btn = $("r-do"); btn.disabled = true;
-      $("r-result").innerHTML = '<span class="live">läuft … das kann dauern</span>';
-      try {
-        const r = await inv("restore", {
-          jobId: restoreState.job, snapshot: restoreState.snapshot, target,
-          include: restoreState.selected || null, dryRun: $("r-dry").checked
-        });
-        const ok = r.code === 0;
-        $("r-result").innerHTML = `<div class="${ok ? "ok-text" : "bad-text"}">${ok ? "Fertig" : "Beendet mit Code " + r.code} → <span class="mono">${esc(r.target)}</span></div><pre>${esc(r.log)}</pre>`;
-        const open = $("r-open");
-        if (open) { open.style.display = "inline-flex"; open.onclick = () => inv("open_path", { path: r.target }).catch(e => toast(String(e), true)); }
-      } catch (e) {
-        $("r-result").innerHTML = `<div class="bad-text">${esc(String(e))}</div>`;
-      } finally { btn.disabled = false; }
-    };
-  }
-
-  // Settings
-  const oc = $("open-cfg");
-  if (oc) {
-    oc.onclick = () => inv("open_path", { path: st ? st.config_path : "" }).catch(e => toast(String(e), true));
-    $("copy-cfg").onclick = () => {
-      navigator.clipboard.writeText(st ? st.config_path : "").then(() => toast("Pfad kopiert")).catch(() => {});
-    };
-    $("apply-units").onclick = async () => {
-      const r = $("s-result"); r.innerHTML = '<span class="live">schreibe Units …</span>';
-      try {
-        await inv("config_save", { cfg });
-        const list = await inv("apply_units");
-        r.innerHTML = `<div class="ok-text">${list.length} Unit-Dateien geschrieben und Timer aktiviert.</div><pre>${esc(list.join("\n"))}</pre>`;
-      } catch (e) { r.innerHTML = `<div class="bad-text">${esc(String(e))}</div>`; }
-    };
-    $("disable-legacy").onclick = async () => {
-      try {
-        const list = await inv("disable_legacy_units");
-        toast("Alte Units abgeschaltet: " + list.join(", "));
-      } catch (e) { toast(String(e), true); }
-    };
-    $("remove-units").onclick = async () => {
-      if (!confirm("Alle backup-status-Units entfernen? Die Konfiguration bleibt erhalten.")) return;
-      try { await inv("remove_units"); toast("Units entfernt"); }
-      catch (e) { toast(String(e), true); }
-    };
+async function doAct(name, id, idx) {
+  const slot = $("act-" + idx);
+  if (slot) slot.innerHTML = '<span class="live">läuft …</span>';
+  try {
+    const r = await inv(name, { jobId: id, readData: name === "check_repo" && false });
+    if (slot) slot.innerHTML = `<div class="${r.code === 0 ? "oktext" : "badtext"}">${r.code === 0 ? "Fertig" : "Code " + r.code}</div><pre>${esc(r.log)}</pre>`;
+  } catch (e) {
+    if (slot) slot.innerHTML = `<div class="badtext">${esc(String(e))}</div>`;
   }
 }
 
+/* ================= Drahten ================= */
+function wire() {
+  document.querySelectorAll("[data-run]").forEach(b => b.onclick = (ev) => {
+    ev.stopPropagation();
+    doRun(b.dataset.run, b.dataset.id);
+  });
+
+  const save = $("save"); if (save) save.onclick = () => saveCfg();
+  const nr = $("new-restic"); if (nr) nr.onclick = () => {
+    if (page === "backup") collectRestic();
+    cfg.restic.push({ id: "job" + (cfg.restic.length + 1), name: "Neuer Job", enabled: true,
+      repository: "rclone:pcloud:backups/restic", password_file: "", cache_dir: "", paths: [],
+      exclude_file: "", exclude: [], keep_daily: 7, keep_weekly: 4, keep_monthly: 12, keep_yearly: 2,
+      schedule: "12h", startup: "3min", timeout: "12h", tags: ["scheduled"], host: "",
+      one_file_system: true, exclude_caches: true, unit: "", timer: "" });
+    openBackup = cfg.restic.length - 1; render();
+  };
+  const ns = $("new-sync"); if (ns) ns.onclick = () => {
+    if (page === "sync") collectSync();
+    cfg.sync.push({ id: "sync" + (cfg.sync.length + 1), name: "Neuer Sync", enabled: true,
+      source: "", target: "pcloud:", mode: "sync", schedule: "6h", startup: "2min", timeout: "24h",
+      backup_dir: ".deleted/{timestamp}", exclude: [".deleted/**"], extra_flags: [], transfers: 4,
+      checkers: 8, unit: "", timer: "" });
+    openSync = cfg.sync.length - 1; render();
+  };
+
+  document.querySelectorAll("[data-open]").forEach(h => h.onclick = () => {
+    const idx = Number(h.dataset.open);
+    collectRestic();
+    openBackup = openBackup === idx ? null : idx;
+    render();
+  });
+  document.querySelectorAll("[data-open-sync]").forEach(h => h.onclick = () => {
+    const idx = Number(h.dataset.openSync);
+    collectSync();
+    openSync = openSync === idx ? null : idx;
+    render();
+  });
+
+  document.querySelectorAll("[data-del]").forEach(b => b.onclick = () => {
+    collectRestic(); cfg.restic.splice(Number(b.dataset.del), 1); openBackup = null; render();
+  });
+  document.querySelectorAll("[data-del-sync]").forEach(b => b.onclick = () => {
+    collectSync(); cfg.sync.splice(Number(b.dataset.delSync), 1); openSync = null; render();
+  });
+
+  document.querySelectorAll("[data-add-path]").forEach(b => b.onclick = async () => {
+    const idx = Number(b.dataset.addPath);
+    const dir = await inv("pick_folder");
+    if (!dir) return;
+    collectRestic();
+    const job = cfg.restic[idx];
+    if (!job.paths.includes(dir)) job.paths.push(dir);
+    try {
+      cfg = await inv("add_paths", { jobId: job.id, paths: [dir] });
+      await loadCfg(); openBackup = idx; toast("Ordner hinzugefügt"); render();
+    } catch (e) { toast(String(e), true); }
+  });
+
+  document.querySelectorAll("[data-rm-path]").forEach(b => b.onclick = async () => {
+    const idx = Number(b.dataset.rmPath);
+    collectRestic();
+    const job = cfg.restic[idx];
+    job.paths = job.paths.filter(p => p !== b.dataset.path);
+    try {
+      cfg = await inv("config_save", { cfg });
+      await loadCfg(); openBackup = idx; toast("Ordner entfernt"); render();
+    } catch (e) { toast(String(e), true); }
+  });
+
+  document.querySelectorAll("[data-act]").forEach(b => b.onclick = () => {
+    const map = { check: "check_repo", prune: "prune_repo", init: "init_repo" };
+    const body = b.closest(".jobbody");
+    const head = body?.previousElementSibling;
+    const idx = head ? Number(head.dataset.open) : 0;
+    doAct(map[b.dataset.act], b.dataset.id, idx);
+  });
+
+  document.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { filter = b.dataset.filter; render(); });
+
+  /* ----- Restore ----- */
+  if ($("r-load")) {
+    $("r-job").onchange = (e) => { Object.assign(rs, { job: e.target.value, snapshot: "", dir: "", selected: "", snaps: [], files: [], parent: "" }); render(); };
+    $("r-load").onclick = async () => {
+      const btn = $("r-load"); btn.disabled = true;
+      try {
+        const snaps = await inv("snapshots", { jobId: rs.job, limit: null });
+        rs.snaps = snaps.map(s => ({ id: s.id, short_id: s.short_id, time: s.time }));
+        toast(`${snaps.length} Snapshots geladen`);
+        render();
+      } catch (e) { toast(String(e), true); btn.disabled = false; }
+    };
+    document.querySelectorAll("[data-snap]").forEach(el => el.onclick = () => {
+      rs.snapshot = el.dataset.snap;
+      const job = cfg.restic.find(j => j.id === rs.job);
+      rs.dir = job && job.paths[0] ? job.paths[0] : "";
+      rs.files = []; rs.selected = "";
+      render(); browse();
+    });
+    $("r-pick").onclick = async () => { const d = await inv("pick_folder"); if (d) $("r-target").value = d; };
+    $("r-clear").onclick = () => { rs.selected = ""; syncSelected(); renderFiles(); };
+    $("r-do").onclick = async () => {
+      const target = $("r-target").value.trim();
+      if (!target) return toast("Bitte Zielordner wählen", true);
+      if (!rs.snapshot) return toast("Bitte Snapshot wählen", true);
+      const btn = $("r-do"); btn.disabled = true;
+      $("r-result").innerHTML = '<span class="live">läuft …</span>';
+      try {
+        const r = await inv("restore", { jobId: rs.job, snapshot: rs.snapshot, target, include: rs.selected || null, dryRun: $("r-dry").checked });
+        const ok = r.code === 0;
+        $("r-result").innerHTML = `<div class="${ok ? "oktext" : "badtext"}">${ok ? "Fertig" : "Code " + r.code} → <span class="mono">${esc(r.target)}</span></div><pre>${esc(r.log)}</pre>`;
+        const o = $("r-open"); o.style.display = "inline-flex";
+        o.onclick = () => inv("open_path", { path: r.target }).catch(e => toast(String(e), true));
+      } catch (e) { $("r-result").innerHTML = `<div class="badtext">${esc(String(e))}</div>`; }
+      finally { btn.disabled = false; }
+    };
+  }
+
+  /* ----- Verlauf ----- */
+  if ($("h-search")) {
+    $("h-job").onchange = (e) => { hs.job = e.target.value; hs.results = []; hs.picked = {}; render(); };
+    const search = async () => {
+      hs.query = $("h-query").value.trim();
+      if (!hs.query) return toast("Bitte Suchbegriff eingeben", true);
+      const btn = $("h-search"); btn.disabled = true;
+      try {
+        hs.results = await inv("history", { jobId: hs.job, pattern: hs.query });
+        hs.picked = {}; hs.chosen = {};
+        const groups = histGroups();
+        for (const g of groups) hs.chosen[g.path] = g.versions[0].snapshot;
+        toast(`${groups.length} Datei${groups.length === 1 ? "" : "en"} gefunden`);
+        render();
+      } catch (e) { toast(String(e), true); }
+      finally { const b = $("h-search"); if (b) b.disabled = false; }
+    };
+    $("h-search").onclick = search;
+    $("h-query").onkeydown = (e) => { if (e.key === "Enter") search(); };
+    document.querySelectorAll("[data-pick]").forEach(cb => cb.onchange = () => {
+      hs.picked[cb.dataset.pick] = cb.checked;
+      const count = Object.values(hs.picked).filter(Boolean).length;
+      const title = document.querySelector(".panel .section-title");
+      if (title) title.textContent = `Ausgewählte wiederherstellen (${count})`;
+    });
+    document.querySelectorAll("[data-chose]").forEach(sel => sel.onchange = () => {
+      hs.chosen[sel.dataset.chose] = sel.value;
+    });
+    $("h-pick").onclick = async () => { const d = await inv("pick_folder"); if (d) $("h-target").value = d; };
+    $("h-restore").onclick = async () => {
+      const target = $("h-target").value.trim();
+      if (!target) return toast("Bitte Zielordner wählen", true);
+      const items = histGroups().filter(g => hs.picked[g.path]);
+      if (!items.length) return toast("Bitte Dateien auswählen", true);
+      const btn = $("h-restore"); btn.disabled = true;
+      $("h-result").innerHTML = '<span class="live">läuft …</span>';
+      let okCount = 0, lastLog = "";
+      try {
+        for (const g of items) {
+          const snap = hs.chosen[g.path] || g.versions[0].snapshot;
+          const r = await inv("restore", { jobId: hs.job, snapshot: snap, target, include: g.path, dryRun: false });
+          if (r.code === 0) okCount++;
+          lastLog = r.log || lastLog;
+        }
+        $("h-result").innerHTML = `<div class="${okCount === items.length ? "oktext" : "badtext"}">${okCount} von ${items.length} wiederhergestellt → <span class="mono">${esc(target)}</span></div><pre>${esc(lastLog)}</pre>`;
+        const o = $("h-open"); o.style.display = "inline-flex";
+        o.onclick = () => inv("open_path", { path: target }).catch(e => toast(String(e), true));
+      } catch (e) { $("h-result").innerHTML = `<div class="badtext">${esc(String(e))}</div>`; }
+      finally { btn.disabled = false; }
+    };
+  }
+
+  /* ----- Einstellungen ----- */
+  if ($("apply-units")) {
+    $("open-cfg").onclick = () => inv("open_path", { path: st ? st.config_path : "" }).catch(e => toast(String(e), true));
+    $("copy-cfg").onclick = () => navigator.clipboard.writeText(st ? st.config_path : "").then(() => toast("Pfad kopiert")).catch(() => {});
+    $("apply-units").onclick = async () => {
+      const r = $("s-result"); r.innerHTML = '<span class="live">schreibe Units …</span>';
+      try {
+        readSettings();
+        await inv("config_save", { cfg });
+        await loadCfg();
+        const list = await inv("apply_units");
+        r.innerHTML = `<div class="oktext">${list.length} Dateien geschrieben, Timer aktiviert.</div><pre>${esc(list.join("\n"))}</pre>`;
+      } catch (e) { r.innerHTML = `<div class="badtext">${esc(String(e))}</div>`; }
+    };
+    $("disable-legacy").onclick = async () => {
+      try { const l = await inv("disable_legacy_units"); toast("Abgeschaltet: " + l.join(", ")); }
+      catch (e) { toast(String(e), true); }
+    };
+    $("remove-units").onclick = async () => {
+      if (!confirm("Alle backup-status-Units entfernen? Die Konfiguration bleibt erhalten.")) return;
+      try { await inv("remove_units"); toast("Units entfernt"); } catch (e) { toast(String(e), true); }
+    };
+  }
+
+  const reload = $("reload");
+  if (reload) reload.onclick = async () => { reload.disabled = true; await loadFull(true); render(); };
+  if ($("r-selected")) {
+    syncSelected();
+    renderCrumbs();
+    renderFiles();
+  }
+}
+
+/* ================= Start ================= */
 async function boot() {
   nav();
   try { cfg = await inv("config_get"); } catch (e) { cfg = { settings: {}, restic: [], sync: [] }; }
@@ -910,7 +1157,6 @@ async function boot() {
   loadFull(false).then(render);
   setInterval(async () => { await loadFast(); render(); }, 20000);
 }
-
 boot();
 </script>
 </body>

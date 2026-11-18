@@ -234,6 +234,72 @@ async fn search_files(
 }
 
 #[tauri::command]
+async fn history(job_id: String, pattern: String) -> Result<Vec<serde_json::Value>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let cfg = config::load();
+        let job = config::find_restic(&cfg, &job_id)
+            .ok_or_else(|| format!("Restic-Job {} nicht gefunden", job_id))?;
+        runner::restic_history(&cfg, job, &pattern)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn check_repo(job_id: String, read_data: bool) -> Result<RestoreResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let cfg = config::load();
+        let job = config::find_restic(&cfg, &job_id)
+            .ok_or_else(|| format!("Restic-Job {} nicht gefunden", job_id))?;
+        let code = runner::restic_check(&cfg, job, read_data)?;
+        let log = exec::tail(&config::log_path(&cfg, "check", &job.id), 12);
+        Ok(RestoreResult {
+            code,
+            target: job.repository.clone(),
+            log,
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn prune_repo(job_id: String) -> Result<RestoreResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let cfg = config::load();
+        let job = config::find_restic(&cfg, &job_id)
+            .ok_or_else(|| format!("Restic-Job {} nicht gefunden", job_id))?;
+        let code = runner::restic_prune(&cfg, job)?;
+        let log = exec::tail(&config::log_path(&cfg, "prune", &job.id), 12);
+        Ok(RestoreResult {
+            code,
+            target: job.repository.clone(),
+            log,
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn init_repo(job_id: String) -> Result<RestoreResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let cfg = config::load();
+        let job = config::find_restic(&cfg, &job_id)
+            .ok_or_else(|| format!("Restic-Job {} nicht gefunden", job_id))?;
+        let code = runner::restic_init(&cfg, job)?;
+        let log = exec::tail(&config::log_path(&cfg, "init", &job.id), 12);
+        Ok(RestoreResult {
+            code,
+            target: job.repository.clone(),
+            log,
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
 async fn restore(
     job_id: String,
     snapshot: String,
@@ -473,6 +539,80 @@ fn cli() -> Option<i32> {
                 }
             }
         }
+        "check" => {
+            let cfg = config::load();
+            let job = args.get(1).cloned().unwrap_or_default();
+            let read_data = args.iter().any(|a| a == "--read-data");
+            match config::find_restic(&cfg, &job) {
+                Some(j) => match runner::restic_check(&cfg, j, read_data) {
+                    Ok(code) => Some(code),
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        Some(2)
+                    }
+                },
+                None => {
+                    eprintln!("Job {} nicht gefunden", job);
+                    Some(2)
+                }
+            }
+        }
+        "prune" => {
+            let cfg = config::load();
+            let job = args.get(1).cloned().unwrap_or_default();
+            match config::find_restic(&cfg, &job) {
+                Some(j) => match runner::restic_prune(&cfg, j) {
+                    Ok(code) => Some(code),
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        Some(2)
+                    }
+                },
+                None => {
+                    eprintln!("Job {} nicht gefunden", job);
+                    Some(2)
+                }
+            }
+        }
+        "init" => {
+            let cfg = config::load();
+            let job = args.get(1).cloned().unwrap_or_default();
+            match config::find_restic(&cfg, &job) {
+                Some(j) => match runner::restic_init(&cfg, j) {
+                    Ok(code) => Some(code),
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        Some(2)
+                    }
+                },
+                None => {
+                    eprintln!("Job {} nicht gefunden", job);
+                    Some(2)
+                }
+            }
+        }
+        "history" => {
+            // backup-status history <job> <muster>
+            let cfg = config::load();
+            let job = args.get(1).cloned().unwrap_or_default();
+            let pat = args.get(2).cloned().unwrap_or_default();
+            match config::find_restic(&cfg, &job) {
+                Some(j) => match runner::restic_history(&cfg, j, &pat) {
+                    Ok(v) => {
+                        print_json(&v);
+                        Some(0)
+                    }
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        Some(2)
+                    }
+                },
+                None => {
+                    eprintln!("Job {} nicht gefunden", job);
+                    Some(2)
+                }
+            }
+        }
         "restore" => {
             // backup-status restore <job> <snapshot> <ziel> [--include pfad] [--dry-run]
             let cfg = config::load();
@@ -516,6 +656,10 @@ fn cli() -> Option<i32> {
                    snapshots <job>              Snapshots als JSON\n\
                    ls <job> <snapshot> [pfad]   Dateien im Snapshot\n\
                    search <job> <snapshot> <muster>\n\
+                   history <job> <muster>       Verlauf über alle Snapshots\n\
+                   check <job> [--read-data]    Repository prüfen\n\
+                   prune <job>                  nicht benötigte Daten entfernen\n\
+                   init <job>                   Repository anlegen\n\
                    restore <job> <snapshot> <ziel> [--include pfad] [--dry-run]\n\
                    config-path                  Pfad der Konfigurationsdatei"
             );
@@ -571,6 +715,10 @@ fn run_ui() {
             snapshots,
             snapshot_files,
             search_files,
+            history,
+            check_repo,
+            prune_repo,
+            init_repo,
             restore,
             open_path
         ])
